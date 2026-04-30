@@ -59,7 +59,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <SessionTimeoutWatcher />
         <OfflineStatus />
         <PWAInstallPrompt />
-        <Toaster position="top-right" />
+        <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
       </BrowserRouter>
     </QueryClientProvider>
   </React.StrictMode>
