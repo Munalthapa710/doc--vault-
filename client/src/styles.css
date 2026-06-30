@@ -22,6 +22,7 @@ body {
   font-family: var(--app-font-family);
   background: var(--app-background);
   color: var(--app-text);
+  overflow-x: hidden;
 }
 
 button,
@@ -258,6 +259,8 @@ textarea {
 }
 
 .app-shell {
+  max-width: 100vw;
+  overflow-x: hidden;
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--app-primary) 9%, transparent), transparent 300px),
     var(--app-background);
@@ -1253,6 +1256,39 @@ textarea {
   max-width: 100%;
 }
 
+.upload-page,
+.upload-page .page-header,
+.upload-page .page-panel {
+  width: 100%;
+  max-width: 100%;
+}
+
+.upload-page .page-header,
+.upload-page .page-header > div,
+.upload-page .page-panel,
+.upload-drop-zone,
+.upload-drop-zone > div {
+  min-width: 0;
+}
+
+.upload-page .page-header p,
+.upload-drop-zone h2,
+.upload-drop-zone p {
+  overflow-wrap: anywhere;
+}
+
+.upload-file-input {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
 .eyebrow,
 .text-cyan-700,
 .text-cyan-800 {
@@ -1307,6 +1343,8 @@ textarea {
   .app-main {
     padding-left: 0 !important;
     padding-bottom: calc(96px + env(safe-area-inset-bottom));
+    max-width: 100vw;
+    overflow-x: hidden;
   }
 
   .mobile-drawer-trigger {
@@ -1336,6 +1374,9 @@ textarea {
   }
 
   main {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
     padding-left: 1rem;
     padding-right: 1rem;
     padding-bottom: calc(112px + env(safe-area-inset-bottom)) !important;
@@ -1533,6 +1574,11 @@ textarea {
     min-height: 230px;
     border-radius: 20px;
     padding: 18px 12px;
+  }
+
+  .upload-file-label {
+    width: 100%;
+    max-width: 220px;
   }
 
   .upload-drop-zone h2 {

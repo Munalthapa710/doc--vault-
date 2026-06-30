@@ -24,7 +24,7 @@ export function DocumentUpload() {
     }
   };
   return (
-    <div className="grid min-w-0 gap-5 overflow-hidden">
+    <div className="upload-page grid min-w-0 gap-5 overflow-hidden">
       <section className="page-header">
         <div>
           <span className="eyebrow">Cloudinary private storage</span>
@@ -38,9 +38,9 @@ export function DocumentUpload() {
             <UploadCloud className="mx-auto mb-4 text-cyan-700" size={42} />
             <h2 className="text-xl font-black">Drop a private document here</h2>
             <p className="mx-auto mt-2 max-w-full break-words text-sm font-semibold text-slate-500">{file ? `${file.name} - ${(file.size / 1048576).toFixed(2)} MB` : 'or select one from your device'}</p>
-            <label className="btn-secondary mt-5 cursor-pointer">
+            <label className="btn-secondary upload-file-label mt-5 cursor-pointer">
               Choose File
-              <input className="sr-only" type="file" accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx,.xls,.xlsx,.txt" onChange={(e) => pick(e.target.files)} />
+              <input className="upload-file-input" type="file" accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx,.xls,.xlsx,.txt" onChange={(e) => pick(e.target.files)} />
             </label>
           </div>
         </div>
