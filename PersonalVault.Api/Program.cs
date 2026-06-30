@@ -3,10 +3,9 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using PersonalVault.Api.Configurations;
-using PersonalVault.Api.Interfaces;
 using PersonalVault.Api.Middleware;
-using PersonalVault.Api.Repositories;
-using PersonalVault.Api.Services;
+using PersonalVault.Api.Data;
+using PersonalVault.Api;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -25,15 +24,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
-builder.Services.AddSingleton<MongoContext>();
-builder.Services.AddScoped<IAuditLogService, AuditLogService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IOtpService, OtpService>();
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
-builder.Services.AddScoped<IDocumentService, DocumentService>();
-builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddSingleton<ApplicationDbContext>();
+builder.Services.AddPersonalVaultApiServices();
 
 var allowedOrigins = configuration.GetSection("Security:AllowedCorsOrigins").Get<string[]>() ?? [];
 builder.Services.AddCors(options =>
@@ -85,6 +77,6 @@ app.UseAuthorization();
 app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
-    await scope.ServiceProvider.GetRequiredService<MongoContext>().EnsureIndexesAsync();
+    await scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().EnsureIndexesAsync();
 }
 app.Run();

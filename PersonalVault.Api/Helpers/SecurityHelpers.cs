@@ -2,7 +2,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
-using PersonalVault.Api.Models;
+using PersonalVault.Api.Model.Auth;
+using PersonalVault.Api.Model.Document;
+using PersonalVault.Api.Model.Security;
 
 namespace PersonalVault.Api.Helpers;
 
