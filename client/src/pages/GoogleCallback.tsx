@@ -18,7 +18,7 @@ export function GoogleCallback() {
         const response = await authApi.googleLogin(idToken);
         setSession(response.accessToken, response.refreshToken, response.user);
         toast.success('Signed in with Google');
-        navigate(response.user.mustChangePassword ? '/settings/password' : '/', { replace: true });
+        navigate(response.user.mustChangePassword ? '/settings' : '/', { replace: true });
       } catch (error: any) {
         toast.error(error.response?.data?.message || error.message || 'Google login failed');
         navigate('/login', { replace: true });

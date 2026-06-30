@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Download, Eye, File, Heart, RotateCcw, Search, Trash2 } from 'lucide-react';
+import { Download, Eye, File, Heart, Pencil, RotateCcw, Search, Trash2, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { api, documentApi, DocumentItem } from '../api';
@@ -12,8 +12,15 @@ export function DocumentVault() {
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState({ search: '', fileType: '', sort: 'newest', includeDeleted: false, page: 1, pageSize: 12 });
   const [deleteTarget, setDeleteTarget] = useState<DocumentItem | null>(null);
+  const [editTarget, setEditTarget] = useState<DocumentItem | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editTags, setEditTags] = useState('');
   const { data, isLoading } = useQuery({ queryKey: ['documents', filters], queryFn: () => documentApi.list(filters) });
   const docs = data?.rows || [];
+  useEffect(() => {
+    setEditName(editTarget?.displayName || '');
+    setEditTags(editTarget?.tags.join(', ') || '');
+  }, [editTarget]);
 
   const mutate = async (action: () => Promise<unknown>, message: string) => {
     await action();
@@ -29,6 +36,17 @@ export function DocumentVault() {
     anchor.download = `${doc.displayName}.${doc.fileExtension}`;
     anchor.click();
     URL.revokeObjectURL(url);
+  };
+
+  const rename = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!editTarget) return;
+    const tags = editTags.split(',').map((tag) => tag.trim()).filter(Boolean);
+    await documentApi.update(editTarget.id, { displayName: editName, tags });
+    toast.success('Document updated');
+    setEditTarget(null);
+    queryClient.invalidateQueries({ queryKey: ['documents'] });
+    queryClient.invalidateQueries({ queryKey: ['document', editTarget.id] });
   };
 
   return (
@@ -57,6 +75,7 @@ export function DocumentVault() {
               <div className="mobile-data-actions">
                 <div>
                   <Link className="icon-button" to={`/documents/${doc.id}`} title="Preview"><Eye size={17} /></Link>
+                  {!doc.isDeleted && <button className="icon-button" onClick={() => setEditTarget(doc)} title="Rename"><Pencil size={17} /></button>}
                   <button className="icon-button" onClick={() => mutate(() => documentApi.favorite(doc.id), 'Favorite updated')} title="Favorite"><Heart size={17} fill={doc.isFavorite ? 'currentColor' : 'none'} /></button>
                   <button className="icon-button" onClick={() => download(doc)} title="Download"><Download size={17} /></button>
                   {doc.isDeleted ? <button className="icon-button" onClick={() => mutate(() => documentApi.restore(doc.id), 'Document restored')} title="Restore"><RotateCcw size={17} /></button> : <button className="icon-button text-rose-700" onClick={() => setDeleteTarget(doc)} title="Delete"><Trash2 size={17} /></button>}
@@ -68,6 +87,32 @@ export function DocumentVault() {
         <div className="mt-5 flex items-center justify-between text-sm font-bold text-slate-500"><span>{data?.total || 0} documents</span><span>Page {data?.page || 1} of {data?.pages || 1}</span></div>
       </section>
       <ConfirmDialog open={!!deleteTarget} title="Delete document?" message="The document will move to deleted items and can be restored later." confirmLabel="Delete" tone="danger" onCancel={() => setDeleteTarget(null)} onConfirm={() => deleteTarget && mutate(() => documentApi.delete(deleteTarget.id), 'Document deleted').then(() => setDeleteTarget(null))} />
+      {editTarget && (
+        <div className="confirm-layer" role="presentation">
+          <button className="confirm-backdrop" type="button" aria-label="Cancel rename" onClick={() => setEditTarget(null)} />
+          <form className="confirm-panel grid gap-4" role="dialog" aria-modal="true" onSubmit={rename}>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <span className="eyebrow">Document</span>
+                <h2 className="text-lg font-black">Rename Document</h2>
+              </div>
+              <button className="icon-button" type="button" onClick={() => setEditTarget(null)} aria-label="Close"><X size={17} /></button>
+            </div>
+            <label className="grid gap-2 text-sm font-bold">
+              Display name
+              <input className="form-field" value={editName} onChange={(e) => setEditName(e.target.value)} required />
+            </label>
+            <label className="grid gap-2 text-sm font-bold">
+              Tags
+              <input className="form-field" value={editTags} onChange={(e) => setEditTags(e.target.value)} placeholder="passport, insurance, tax" />
+            </label>
+            <div className="confirm-actions mt-0">
+              <button className="btn-secondary" type="button" onClick={() => setEditTarget(null)}>Cancel</button>
+              <button className="btn-primary" type="submit">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

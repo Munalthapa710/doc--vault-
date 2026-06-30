@@ -7,6 +7,7 @@
   --app-background: #f6f8fc;
   --app-text: #0f172a;
   --app-sidebar: #edf7fb;
+  --app-font-family: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, ui-sans-serif, system-ui, sans-serif;
   --app-primary-soft: color-mix(in srgb, var(--app-primary) 11%, white);
   --app-primary-muted: color-mix(in srgb, var(--app-primary) 22%, white);
   --app-primary-strong: color-mix(in srgb, var(--app-primary) 82%, black);
@@ -18,7 +19,7 @@
 
 body {
   margin: 0;
-  font-family: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--app-font-family);
   background: var(--app-background);
   color: var(--app-text);
 }

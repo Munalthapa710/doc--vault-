@@ -3,18 +3,21 @@ export type AppearanceSettings = {
   backgroundColor: string;
   textColor: string;
   sidebarColor: string;
+  fontFamily: string;
 };
 
 export const defaultAppearance: AppearanceSettings = {
   primaryColor: '#0891b2',
   backgroundColor: '#f6f8fc',
   textColor: '#0f172a',
-  sidebarColor: '#edf7fb'
+  sidebarColor: '#edf7fb',
+  fontFamily: 'system'
 };
 
 const storageKey = 'personalVault.appearance';
 
 const isHexColor = (value: string) => /^#[0-9A-Fa-f]{6}$/.test(value);
+const allowedFonts = new Set(['system', 'inter', 'serif', 'mono']);
 
 export const loadAppearance = (): AppearanceSettings => {
   try {
@@ -25,7 +28,8 @@ export const loadAppearance = (): AppearanceSettings => {
       primaryColor: isHexColor(parsed.primaryColor || '') ? parsed.primaryColor! : defaultAppearance.primaryColor,
       backgroundColor: isHexColor(parsed.backgroundColor || '') ? parsed.backgroundColor! : defaultAppearance.backgroundColor,
       textColor: isHexColor(parsed.textColor || '') ? parsed.textColor! : defaultAppearance.textColor,
-      sidebarColor: isHexColor(parsed.sidebarColor || '') ? parsed.sidebarColor! : defaultAppearance.sidebarColor
+      sidebarColor: isHexColor(parsed.sidebarColor || '') ? parsed.sidebarColor! : defaultAppearance.sidebarColor,
+      fontFamily: allowedFonts.has(parsed.fontFamily || '') ? parsed.fontFamily! : defaultAppearance.fontFamily
     };
   } catch {
     return defaultAppearance;
@@ -48,8 +52,16 @@ export const applyAppearance = (settings: AppearanceSettings) => {
   root.style.setProperty('--app-background', settings.backgroundColor);
   root.style.setProperty('--app-text', settings.textColor);
   root.style.setProperty('--app-sidebar', settings.sidebarColor);
+  root.style.setProperty('--app-font-family', resolveFontFamily(settings.fontFamily));
 };
 
 export const applyStoredAppearance = () => {
   applyAppearance(loadAppearance());
+};
+
+const resolveFontFamily = (font: string) => {
+  if (font === 'inter') return '"Inter", "Segoe UI", Arial, sans-serif';
+  if (font === 'serif') return 'Georgia, "Times New Roman", serif';
+  if (font === 'mono') return '"SFMono-Regular", Consolas, "Liberation Mono", monospace';
+  return '"SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, ui-sans-serif, system-ui, sans-serif';
 };

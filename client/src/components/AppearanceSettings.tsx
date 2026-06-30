@@ -3,7 +3,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { defaultAppearance, loadAppearance, resetAppearance, saveAppearance, type AppearanceSettings } from '../theme';
 
-const fields: Array<{ key: keyof AppearanceSettings; label: string; description: string }> = [
+const fields: Array<{ key: Exclude<keyof AppearanceSettings, 'fontFamily'>; label: string; description: string }> = [
   { key: 'primaryColor', label: 'Theme Color', description: 'Buttons, active menu items, highlights, and chart accents.' },
   { key: 'backgroundColor', label: 'Page Background', description: 'Main workspace background color.' },
   { key: 'textColor', label: 'Text Color', description: 'Primary readable text across the app.' },
@@ -11,6 +11,12 @@ const fields: Array<{ key: keyof AppearanceSettings; label: string; description:
 ];
 
 const presets = ['#0891b2', '#0f766e', '#7c3aed', '#be123c', '#4338ca', '#15803d'];
+const fontOptions = [
+  { value: 'system', label: 'System Sans' },
+  { value: 'inter', label: 'Inter / Segoe' },
+  { value: 'serif', label: 'Serif' },
+  { value: 'mono', label: 'Mono' }
+];
 
 export function AppearanceSettings() {
   const [settings, setSettings] = useState<AppearanceSettings>(() => loadAppearance());
@@ -74,6 +80,13 @@ export function AppearanceSettings() {
               </div>
             </label>
           ))}
+          <label className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <span className="block text-sm font-black text-slate-700">Text Font</span>
+            <span className="mt-1 block text-xs text-slate-500">Change the font used across the vault interface.</span>
+            <select className="form-field mt-3" value={settings.fontFamily} onChange={(event) => update('fontFamily', event.target.value)}>
+              {fontOptions.map((font) => <option key={font.value} value={font.value}>{font.label}</option>)}
+            </select>
+          </label>
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -97,7 +110,7 @@ export function AppearanceSettings() {
             <div className="p-4" style={{ background: settings.sidebarColor }}>
               <div className="mb-3 flex items-center gap-2">
                 <div className="grid h-9 w-9 place-items-center rounded-lg text-white" style={{ background: settings.primaryColor }}>A</div>
-                <strong style={{ color: settings.textColor }}>Aawaran Inventory</strong>
+                <strong style={{ color: settings.textColor }}>Personal Vault</strong>
               </div>
               <div className="rounded-lg px-3 py-2 text-sm font-black text-white" style={{ background: settings.primaryColor }}>Active Menu</div>
             </div>

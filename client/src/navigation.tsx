@@ -1,4 +1,4 @@
-import { FileArchive, Gauge, Settings, ShieldCheck, UploadCloud } from 'lucide-react';
+import { FileArchive, Gauge, Settings, UploadCloud } from 'lucide-react';
 
 export const navGroups = [
   {
@@ -12,8 +12,7 @@ export const navGroups = [
   {
     label: 'Security',
     items: [
-      { path: '/settings', title: 'Settings', icon: Settings },
-      { path: '/settings/password', title: 'Password', icon: ShieldCheck }
+      { path: '/settings', title: 'Settings', icon: Settings }
     ]
   }
 ];

@@ -8,7 +8,6 @@ const DocumentVault = lazy(() => import('./pages/DocumentVault').then((module) =
 const DocumentUpload = lazy(() => import('./pages/DocumentUpload').then((module) => ({ default: module.DocumentUpload })));
 const DocumentPreview = lazy(() => import('./pages/DocumentPreview').then((module) => ({ default: module.DocumentPreview })));
 const Settings = lazy(() => import('./pages/Settings').then((module) => ({ default: module.Settings })));
-const ChangePassword = lazy(() => import('./pages/ChangePassword').then((module) => ({ default: module.ChangePassword })));
 
 function RouteFallback() {
   return (
@@ -28,7 +27,7 @@ export function AuthenticatedRoutes() {
           <Route path="documents/upload" element={<DocumentUpload />} />
           <Route path="documents/:id" element={<DocumentPreview />} />
           <Route path="settings" element={<Settings />} />
-          <Route path="settings/password" element={<ChangePassword />} />
+          <Route path="settings/password" element={<Navigate to="/settings" replace />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

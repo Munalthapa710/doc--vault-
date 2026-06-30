@@ -1,14 +1,15 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { settingsApi } from '../api';
+import { authApi, settingsApi } from '../api';
+import { AppearanceSettings } from '../components/AppearanceSettings';
 import { useAppStore } from '../store';
 
 export function Settings() {
   const { user, refreshMe } = useAppStore();
   const [fullName, setFullName] = useState(user?.fullName || '');
   const [emailOtpLoginEnabled, setEmailOtpLoginEnabled] = useState(user?.emailOtpLoginEnabled ?? true);
-  const { data: sessions } = useQuery({ queryKey: ['sessions'], queryFn: settingsApi.sessions });
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   useEffect(() => { setFullName(user?.fullName || ''); setEmailOtpLoginEnabled(user?.emailOtpLoginEnabled ?? true); }, [user]);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -16,9 +17,21 @@ export function Settings() {
     await refreshMe();
     toast.success('Profile updated');
   };
+  const changePassword = async (event: FormEvent) => {
+    event.preventDefault();
+    try {
+      await authApi.changePassword(user?.hasLocalPassword ? currentPassword : undefined, newPassword);
+      await refreshMe();
+      setCurrentPassword('');
+      setNewPassword('');
+      toast.success(user?.hasLocalPassword ? 'Password changed' : 'Local password created');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Unable to update password');
+    }
+  };
   return (
     <div className="grid gap-5">
-      <section className="page-header"><div><span className="eyebrow">Account</span><h1>Settings</h1><p>Manage profile, OTP preference, sessions, and linked Google status.</p></div></section>
+      <section className="page-header"><div><span className="eyebrow">Account</span><h1>Settings</h1><p>Manage profile, password, appearance, OTP preference, and linked Google status.</p></div></section>
       <section className="grid gap-5 lg:grid-cols-2">
         <form onSubmit={submit} className="page-panel">
           <h2 className="panel-title">Profile</h2>
@@ -30,14 +43,17 @@ export function Settings() {
             <button className="btn-primary">Save Profile</button>
           </div>
         </form>
-        <div className="page-panel">
-          <h2 className="panel-title">Active Sessions</h2>
+        <form onSubmit={changePassword} className="page-panel">
+          <h2 className="panel-title">{user?.hasLocalPassword ? 'Change Password' : 'Set Password'}</h2>
           <div className="grid gap-2">
-            {(sessions || []).map((session) => <div key={session.id} className="rounded-xl bg-slate-50 p-3 text-sm font-bold"><div>{session.ipAddress || 'Unknown IP'}</div><div className="mt-1 text-xs text-slate-500">{new Date(session.createdAt).toLocaleString()}</div></div>)}
-            {(!sessions || sessions.length === 0) && <p className="text-sm font-bold text-slate-500">No active sessions listed.</p>}
+            <p className="mb-2 text-sm font-bold text-slate-500">Use at least 8 characters with uppercase, lowercase, number, and special character.</p>
+            {user?.hasLocalPassword && <input className="form-field" type="password" placeholder="Current password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required />}
+            <input className="form-field" type="password" placeholder="New strong password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
+            <button className="btn-primary">Save Password</button>
           </div>
-        </div>
+        </form>
       </section>
+      <AppearanceSettings />
     </div>
   );
 }
