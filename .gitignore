@@ -1,0 +1,7 @@
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/
+*.log
+.env
+PersonalVault.Api/appsettings.Development.local.json

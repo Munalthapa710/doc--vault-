@@ -1,0 +1,45 @@
+{
+  "name": "Personal Document Vault",
+  "short_name": "Vault",
+  "id": "/",
+  "description": "Secure private document vault for personal files.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#f6f8fc",
+  "theme_color": "#0891b2",
+  "dir": "ltr",
+  "lang": "en",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    { "src": "/logoaearan.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "url": "/",
+      "icons": [{ "src": "/logoaearan.png", "sizes": "1024x1024", "type": "image/png" }]
+    },
+    {
+      "name": "Documents",
+      "short_name": "Docs",
+      "url": "/documents",
+      "icons": [{ "src": "/logoaearan.png", "sizes": "1024x1024", "type": "image/png" }]
+    },
+    {
+      "name": "Upload",
+      "short_name": "Upload",
+      "url": "/documents/upload",
+      "icons": [{ "src": "/logoaearan.png", "sizes": "1024x1024", "type": "image/png" }]
+    },
+    {
+      "name": "Settings",
+      "short_name": "Settings",
+      "url": "/settings",
+      "icons": [{ "src": "/logoaearan.png", "sizes": "1024x1024", "type": "image/png" }]
+    }
+  ]
+}
