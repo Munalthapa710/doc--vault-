@@ -36,7 +36,7 @@ export function Layout() {
                 {group.items.map((item) => {
                   const Icon = item.icon;
                   return (
-                    <NavLink key={item.path} to={item.path} end={item.path === '/'} className={({ isActive }) => clsx('sidebar-link group', isActive && 'active', sidebarCollapsed && 'justify-center')} title={item.title}>
+                    <NavLink key={item.path} to={item.path} end className={({ isActive }) => clsx('sidebar-link group', isActive && 'active', sidebarCollapsed && 'justify-center')} title={item.title}>
                       <span className="sidebar-link-icon"><Icon size={18} /></span>
                       {!sidebarCollapsed && <span className="truncate">{item.title}</span>}
                     </NavLink>
@@ -79,7 +79,7 @@ export function Layout() {
         {bottomItems.map((item) => {
           const Icon = item.icon;
           return (
-            <NavLink key={item.path} to={item.path} end={item.path === '/'} className={({ isActive }) => clsx('mobile-bottom-link', isActive && 'active')}>
+            <NavLink key={item.path} to={item.path} end className={({ isActive }) => clsx('mobile-bottom-link', isActive && 'active')}>
               <Icon size={19} />
               <span>{bottomLabels[item.path] || item.title}</span>
             </NavLink>
@@ -105,7 +105,7 @@ export function Layout() {
                   <div className="mobile-menu-items">
                     {group.items.map((item) => {
                       const Icon = item.icon;
-                      return <NavLink key={item.path} to={item.path} end={item.path === '/'} className={({ isActive }) => clsx('mobile-menu-link', isActive && 'active')} onClick={() => setMobileMenuOpen(false)}><Icon size={18} /><span>{item.title}</span></NavLink>;
+                      return <NavLink key={item.path} to={item.path} end className={({ isActive }) => clsx('mobile-menu-link', isActive && 'active')} onClick={() => setMobileMenuOpen(false)}><Icon size={18} /><span>{item.title}</span></NavLink>;
                     })}
                   </div>
                 </section>
