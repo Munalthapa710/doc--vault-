@@ -12,9 +12,13 @@ export function Layout() {
   const [mobileMenuClosing, setMobileMenuClosing] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
   const navigate = useNavigate();
-  const bottomPaths = new Set(['/', '/documents', '/documents/upload', '/settings']);
+  const passwordSetupRequired = !!user?.mustChangePassword;
+  const visibleNavGroups = passwordSetupRequired
+    ? navGroups.map((group) => ({ ...group, items: group.items.filter((item) => item.path === '/settings') })).filter((group) => group.items.length > 0)
+    : navGroups;
+  const bottomPaths = new Set(passwordSetupRequired ? ['/settings'] : ['/', '/documents', '/documents/upload', '/settings']);
   const bottomLabels: Record<string, string> = { '/': 'Home', '/documents': 'Vault', '/documents/upload': 'Upload', '/settings': 'Settings' };
-  const bottomItems = navGroups.flatMap((group) => group.items).filter((item) => bottomPaths.has(item.path));
+  const bottomItems = visibleNavGroups.flatMap((group) => group.items).filter((item) => bottomPaths.has(item.path));
 
   const handleLogout = async () => {
     await logout();
@@ -43,7 +47,7 @@ export function Layout() {
           {!sidebarCollapsed && <strong className="block truncate text-[15px]">Personal Vault</strong>}
         </div>
         <nav className="sidebar-scroll flex-1 overflow-y-auto px-3 py-4">
-          {navGroups.map((group) => (
+          {visibleNavGroups.map((group) => (
             <div key={group.label} className="mb-4">
               {!sidebarCollapsed && <div className="sidebar-section-label">{group.label}</div>}
               <div className="space-y-1.5">
@@ -108,7 +112,7 @@ export function Layout() {
               <button className="icon-button" type="button" onClick={closeMobileMenu} aria-label="Close menu"><X size={18} /></button>
             </div>
             <nav className="mobile-menu-list">
-              {navGroups.map((group) => (
+              {visibleNavGroups.map((group) => (
                 <section key={group.label}>
                   <div className="sidebar-section-label">{group.label}</div>
                   <div className="mobile-menu-items">

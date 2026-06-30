@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { TableSkeleton } from './components/LoadingSkeleton';
+import { useAppStore } from './store';
 
 const Dashboard = lazy(() => import('./pages/Dashboard').then((module) => ({ default: module.Dashboard })));
 const DocumentVault = lazy(() => import('./pages/DocumentVault').then((module) => ({ default: module.DocumentVault })));
@@ -18,10 +19,20 @@ function RouteFallback() {
 }
 
 export function AuthenticatedRoutes() {
+  const user = useAppStore((state) => state.user);
+  const mustSetPassword = user?.mustChangePassword;
+
   return (
     <Suspense fallback={<RouteFallback />}>
       <Routes>
         <Route element={<Layout />}>
+          {mustSetPassword ? (
+            <>
+              <Route path="settings" element={<Settings />} />
+              <Route path="*" element={<Navigate to="/settings" replace />} />
+            </>
+          ) : (
+            <>
           <Route index element={<Dashboard />} />
           <Route path="documents" element={<DocumentVault />} />
           <Route path="documents/deleted" element={<DocumentVault />} />
@@ -29,6 +40,8 @@ export function AuthenticatedRoutes() {
           <Route path="documents/:id" element={<DocumentPreview />} />
           <Route path="settings" element={<Settings />} />
           <Route path="settings/password" element={<Navigate to="/settings" replace />} />
+            </>
+          )}
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

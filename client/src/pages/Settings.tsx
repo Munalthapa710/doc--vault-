@@ -10,6 +10,7 @@ export function Settings() {
   const [emailOtpLoginEnabled, setEmailOtpLoginEnabled] = useState(user?.emailOtpLoginEnabled ?? true);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const mustSetPassword = !!user?.mustChangePassword;
   useEffect(() => { setFullName(user?.fullName || ''); setEmailOtpLoginEnabled(user?.emailOtpLoginEnabled ?? true); }, [user]);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -31,19 +32,22 @@ export function Settings() {
   };
   return (
     <div className="grid gap-5">
-      <section className="page-header"><div><span className="eyebrow">Account</span><h1>Settings</h1><p>Manage profile, password, appearance, OTP preference, and linked Google status.</p></div></section>
-      <section className="grid gap-5 lg:grid-cols-2">
-        <form onSubmit={submit} className="page-panel">
-          <h2 className="panel-title">Profile</h2>
-          <div className="grid gap-4">
-            <input className="form-field" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
-            <input className="form-field" value={user?.email || ''} disabled />
-            <label className="flex items-center gap-2 text-sm font-bold"><input type="checkbox" checked={emailOtpLoginEnabled} onChange={(e) => setEmailOtpLoginEnabled(e.target.checked)} /> Enable email OTP login</label>
-            <div className="rounded-xl bg-slate-50 p-4 text-sm font-bold text-slate-600">Google linked: {user?.authProvider.includes('Google') ? 'Yes' : 'No'}</div>
-            <button className="btn-primary">Save Profile</button>
-          </div>
-        </form>
-        <form onSubmit={changePassword} className="page-panel">
+      <section className="page-header"><div><span className="eyebrow">Account</span><h1>{mustSetPassword ? 'Set Password' : 'Settings'}</h1><p>{mustSetPassword ? 'Create a local password before using the document vault.' : 'Manage profile, password, appearance, OTP preference, and linked Google status.'}</p></div></section>
+      {mustSetPassword && <section className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-900">For security, your Google account must create a local password before other vault features are available.</section>}
+      <section className={mustSetPassword ? 'grid gap-5 lg:grid-cols-1' : 'grid gap-5 lg:grid-cols-2'}>
+        {!mustSetPassword && (
+          <form onSubmit={submit} className="page-panel">
+            <h2 className="panel-title">Profile</h2>
+            <div className="grid gap-4">
+              <input className="form-field" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+              <input className="form-field" value={user?.email || ''} disabled />
+              <label className="flex items-center gap-2 text-sm font-bold"><input type="checkbox" checked={emailOtpLoginEnabled} onChange={(e) => setEmailOtpLoginEnabled(e.target.checked)} /> Enable email OTP login</label>
+              <div className="rounded-xl bg-slate-50 p-4 text-sm font-bold text-slate-600">Google linked: {user?.authProvider.includes('Google') ? 'Yes' : 'No'}</div>
+              <button className="btn-primary">Save Profile</button>
+            </div>
+          </form>
+        )}
+        <form onSubmit={changePassword} className={mustSetPassword ? 'page-panel max-w-xl' : 'page-panel'}>
           <h2 className="panel-title">{user?.hasLocalPassword ? 'Change Password' : 'Set Password'}</h2>
           <div className="grid gap-2">
             <p className="mb-2 text-sm font-bold text-slate-500">Use at least 8 characters with uppercase, lowercase, number, and special character.</p>
@@ -53,7 +57,7 @@ export function Settings() {
           </div>
         </form>
       </section>
-      <AppearanceSettings />
+      {!mustSetPassword && <AppearanceSettings />}
     </div>
   );
 }
