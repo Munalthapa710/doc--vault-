@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { Eye, EyeOff } from 'lucide-react';
 import { authApi, settingsApi, storageKeys } from '../api';
 import { AppearanceSettings } from '../components/AppearanceSettings';
 import { useAppStore } from '../store';
@@ -11,6 +12,7 @@ export function Settings() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [secretWord, setSecretWord] = useState('');
+  const [showSecretWord, setShowSecretWord] = useState(false);
   const mustSetPassword = !!user?.mustChangePassword;
   useEffect(() => { setFullName(user?.fullName || ''); setEmailOtpLoginEnabled(user?.emailOtpLoginEnabled ?? true); }, [user]);
   const submit = async (event: FormEvent) => {
@@ -74,7 +76,12 @@ export function Settings() {
             <h2 className="panel-title">{user?.hasSecretWord ? 'Edit Secret Word' : 'Set Secret Word'}</h2>
             <div className="grid gap-3">
               <p className="text-sm font-bold text-slate-500">Use this as an alternative to OTP after entering your email and password. It is stored securely and cannot be viewed later.</p>
-              <input className="form-field" type="password" placeholder="Secret word" value={secretWord} onChange={(e) => setSecretWord(e.target.value)} minLength={4} required />
+              <div className="password-field">
+                <input className="form-field pr-12" type={showSecretWord ? 'text' : 'password'} placeholder="Secret word" value={secretWord} onChange={(e) => setSecretWord(e.target.value)} minLength={4} required />
+                <button className="password-toggle" type="button" onClick={() => setShowSecretWord((value) => !value)} aria-label={showSecretWord ? 'Hide secret word' : 'Show secret word'}>
+                  {showSecretWord ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               <div className="rounded-xl bg-slate-50 p-3 text-sm font-bold text-slate-600">Status: {user?.hasSecretWord ? 'Secret word set' : 'Not set'}</div>
               <button className="btn-primary">Save Secret Word</button>
             </div>

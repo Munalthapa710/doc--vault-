@@ -1,7 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { LockKeyhole } from 'lucide-react';
+import { Eye, EyeOff, LockKeyhole } from 'lucide-react';
 import { useAppStore } from '../store';
 
 export function Login({ mode = 'password' }: { mode?: 'password' | 'otp' }) {
@@ -11,6 +11,7 @@ export function Login({ mode = 'password' }: { mode?: 'password' | 'otp' }) {
   const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
   const [secretWord, setSecretWord] = useState('');
+  const [showSecretWord, setShowSecretWord] = useState(false);
   const [loginMethod, setLoginMethod] = useState<'otp' | 'secret'>('otp');
   const [loading, setLoading] = useState(false);
 
@@ -74,7 +75,14 @@ export function Login({ mode = 'password' }: { mode?: 'password' | 'otp' }) {
                 <button className={loginMethod === 'secret' ? 'btn-primary min-h-9' : 'btn-secondary min-h-9'} type="button" onClick={() => setLoginMethod('secret')}>Secret word</button>
               </div>
               <input className="form-field" type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-              {loginMethod === 'secret' && <input className="form-field" type="password" placeholder="Secret word" value={secretWord} onChange={(e) => setSecretWord(e.target.value)} minLength={4} required />}
+              {loginMethod === 'secret' && (
+                <div className="password-field">
+                  <input className="form-field pr-12" type={showSecretWord ? 'text' : 'password'} placeholder="Secret word" value={secretWord} onChange={(e) => setSecretWord(e.target.value)} minLength={4} required />
+                  <button className="password-toggle" type="button" onClick={() => setShowSecretWord((value) => !value)} aria-label={showSecretWord ? 'Hide secret word' : 'Show secret word'}>
+                    {showSecretWord ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              )}
             </>
           )}
           <button className="btn-primary w-full" disabled={loading}><LockKeyhole size={18} />{loading ? 'Please wait...' : mode === 'otp' ? 'Verify OTP' : loginMethod === 'secret' ? 'Sign In' : 'Send OTP'}</button>
