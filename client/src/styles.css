@@ -1249,6 +1249,10 @@ textarea {
   color: var(--app-primary-strong);
 }
 
+.upload-drop-zone {
+  max-width: 100%;
+}
+
 .eyebrow,
 .text-cyan-700,
 .text-cyan-800 {
@@ -1523,6 +1527,17 @@ textarea {
     border-radius: 24px;
     border-color: #eef2f7;
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  }
+
+  .upload-drop-zone {
+    min-height: 230px;
+    border-radius: 20px;
+    padding: 18px 12px;
+  }
+
+  .upload-drop-zone h2 {
+    font-size: 1.05rem;
+    line-height: 1.2;
   }
 
   .stat-card {
