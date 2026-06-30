@@ -24,6 +24,7 @@ export function AuthenticatedRoutes() {
         <Route element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="documents" element={<DocumentVault />} />
+          <Route path="documents/deleted" element={<DocumentVault />} />
           <Route path="documents/upload" element={<DocumentUpload />} />
           <Route path="documents/:id" element={<DocumentPreview />} />
           <Route path="settings" element={<Settings />} />

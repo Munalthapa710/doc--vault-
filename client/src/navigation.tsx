@@ -1,4 +1,4 @@
-import { FileArchive, Gauge, Settings, UploadCloud } from 'lucide-react';
+import { FileArchive, Gauge, RotateCcw, Settings, UploadCloud } from 'lucide-react';
 
 export const navGroups = [
   {
@@ -12,6 +12,7 @@ export const navGroups = [
   {
     label: 'Security',
     items: [
+      { path: '/documents/deleted', title: 'Restore Deleted', icon: RotateCcw },
       { path: '/settings', title: 'Settings', icon: Settings }
     ]
   }
