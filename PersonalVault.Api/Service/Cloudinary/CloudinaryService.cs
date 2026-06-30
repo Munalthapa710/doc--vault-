@@ -20,7 +20,7 @@ public class CloudinaryService(IHttpClientFactory httpClientFactory, IOptions<Cl
         var folder = $"{settings.Folder.Trim('/')}/{userId}/documents";
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
         var publicId = Path.GetFileNameWithoutExtension(safeFileName);
-        var signatureBase = $"folder={folder}&public_id={publicId}&timestamp={timestamp}&type=authenticated{settings.ApiSecret}";
+        var signatureBase = $"folder={folder}&public_id={publicId}&timestamp={timestamp}{settings.ApiSecret}";
         var signature = Sha1(signatureBase);
 
         using var content = new MultipartFormDataContent();
@@ -33,11 +33,14 @@ public class CloudinaryService(IHttpClientFactory httpClientFactory, IOptions<Cl
         content.Add(new StringContent(signature), "signature");
         content.Add(new StringContent(folder), "folder");
         content.Add(new StringContent(publicId), "public_id");
-        content.Add(new StringContent("authenticated"), "type");
 
         var client = httpClientFactory.CreateClient();
         using var response = await client.PostAsync($"https://api.cloudinary.com/v1_1/{settings.CloudName}/{resourceType}/upload", content, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadAsStringAsync(cancellationToken);
+            throw new InvalidOperationException($"Cloudinary upload failed: {error}");
+        }
         await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
         using var json = await JsonDocument.ParseAsync(responseStream, cancellationToken: cancellationToken);
         var root = json.RootElement;
@@ -53,11 +56,16 @@ public class CloudinaryService(IHttpClientFactory httpClientFactory, IOptions<Cl
         };
     }
 
-    public async Task<Stream> DownloadAsync(string publicId, string resourceType, CancellationToken cancellationToken)
+    public async Task<Stream> DownloadAsync(string publicId, string resourceType, string secureUrl, CancellationToken cancellationToken)
     {
         var client = httpClientFactory.CreateClient();
-        var response = await client.GetAsync(CreateSignedUrl(publicId, resourceType), cancellationToken);
-        response.EnsureSuccessStatusCode();
+        var downloadUrl = string.IsNullOrWhiteSpace(secureUrl) ? CreateSignedUrl(publicId, resourceType) : secureUrl;
+        var response = await client.GetAsync(downloadUrl, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadAsStringAsync(cancellationToken);
+            throw new InvalidOperationException($"Cloudinary download failed: {error}");
+        }
         return await response.Content.ReadAsStreamAsync(cancellationToken);
     }
 
@@ -65,12 +73,11 @@ public class CloudinaryService(IHttpClientFactory httpClientFactory, IOptions<Cl
     {
         var settings = options.Value;
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
-        var signature = Sha1($"public_id={publicId}&timestamp={timestamp}&type=authenticated{settings.ApiSecret}");
+        var signature = Sha1($"public_id={publicId}&timestamp={timestamp}{settings.ApiSecret}");
         using var content = new FormUrlEncodedContent(new Dictionary<string, string>
         {
             ["public_id"] = publicId,
             ["timestamp"] = timestamp,
-            ["type"] = "authenticated",
             ["api_key"] = settings.ApiKey,
             ["signature"] = signature
         });

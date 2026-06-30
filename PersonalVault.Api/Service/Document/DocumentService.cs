@@ -78,7 +78,7 @@ public class DocumentService(ApplicationDbContext context, ICloudinaryService cl
     public async Task<(Stream Stream, string MimeType, string FileName)> DownloadAsync(string userId, string id, HttpContext httpContext, CancellationToken cancellationToken)
     {
         var doc = await RequireDocument(userId, id, false);
-        var stream = await cloudinaryService.DownloadAsync(doc.CloudinaryPublicId, doc.CloudinaryResourceType, cancellationToken);
+        var stream = await cloudinaryService.DownloadAsync(doc.CloudinaryPublicId, doc.CloudinaryResourceType, doc.CloudinarySecureUrl, cancellationToken);
         await context.Documents.UpdateOneAsync(x => x.Id == id, Builders<DocumentFile>.Update.Set(x => x.LastDownloadedAt, DateTime.UtcNow), cancellationToken: cancellationToken);
         await auditLogService.LogAsync(userId, "Document downloaded", httpContext, new Dictionary<string, string> { ["documentId"] = id });
         return (stream, doc.MimeType, $"{doc.DisplayName}.{doc.FileExtension}");
