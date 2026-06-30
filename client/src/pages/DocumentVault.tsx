@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Download, Eye, File, Heart, Pencil, RotateCcw, Search, Trash2, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -67,7 +67,7 @@ export function DocumentVault() {
           {!isLoading && docs.length === 0 && <p className="rounded-xl bg-slate-50 p-6 text-center text-sm font-bold text-slate-500">No documents match this view.</p>}
           {docs.map((doc) => (
             <article key={doc.id} className="mobile-list-row rounded-xl border border-slate-200 bg-white shadow-sm">
-              <span className="mobile-list-thumb"><File size={22} /></span>
+              <DocumentThumb doc={doc} />
               <div className="mobile-list-main">
                 <strong>{doc.displayName}</strong>
                 <div className="mobile-list-meta"><span>{doc.fileExtension.toUpperCase()}</span><span>{formatBytes(doc.fileSize)}</span><span>{new Date(doc.uploadedAt).toLocaleDateString()}</span></div>
@@ -114,5 +114,25 @@ export function DocumentVault() {
         </div>
       )}
     </div>
+  );
+}
+
+function DocumentThumb({ doc }: { doc: DocumentItem }) {
+  const isImage = doc.mimeType.startsWith('image/') && !doc.isDeleted;
+  const { data: previewBlob } = useQuery({
+    queryKey: ['document-thumb', doc.id],
+    queryFn: async () => (await api.get(`/documents/${doc.id}/preview`, { responseType: 'blob' })).data as Blob,
+    enabled: isImage
+  });
+  const previewUrl = useMemo(() => previewBlob ? URL.createObjectURL(previewBlob) : '', [previewBlob]);
+
+  useEffect(() => () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+  }, [previewUrl]);
+
+  return (
+    <span className="mobile-list-thumb">
+      {previewUrl ? <img src={previewUrl} alt={doc.displayName} loading="lazy" /> : <File size={22} />}
+    </span>
   );
 }
