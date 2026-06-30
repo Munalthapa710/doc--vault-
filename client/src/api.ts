@@ -33,13 +33,16 @@ api.interceptors.response.use(
         localStorage.setItem(storageKeys.accessToken, data.accessToken);
         localStorage.setItem(storageKeys.refreshToken, data.refreshToken);
         localStorage.setItem(storageKeys.user, JSON.stringify(data.user));
+        original.headers = original.headers || {};
         original.headers.Authorization = `Bearer ${data.accessToken}`;
         return api(original);
       } catch (refreshError) {
-        localStorage.removeItem(storageKeys.accessToken);
-        localStorage.removeItem(storageKeys.refreshToken);
-        localStorage.removeItem(storageKeys.user);
-        if (!window.location.pathname.startsWith('/login')) window.location.assign('/login');
+        if (axios.isAxiosError(refreshError) && [400, 401, 403].includes(refreshError.response?.status || 0)) {
+          localStorage.removeItem(storageKeys.accessToken);
+          localStorage.removeItem(storageKeys.refreshToken);
+          localStorage.removeItem(storageKeys.user);
+          if (!window.location.pathname.startsWith('/login')) window.location.assign('/login');
+        }
         return Promise.reject(refreshError);
       }
     }
