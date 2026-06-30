@@ -14,12 +14,13 @@ export function DocumentVault() {
   const queryClient = useQueryClient();
   const location = useLocation();
   const isDeletedView = location.pathname === '/documents/deleted';
-  const [filters, setFilters] = useState({ search: '', fileType: '', sort: 'newest', includeDeleted: false, page: 1, pageSize: 12 });
+  const [filters, setFilters] = useState({ search: '', page: 1, pageSize: 12 });
   const [deleteTarget, setDeleteTarget] = useState<DocumentItem | null>(null);
+  const [permanentDeleteTarget, setPermanentDeleteTarget] = useState<DocumentItem | null>(null);
   const [editTarget, setEditTarget] = useState<DocumentItem | null>(null);
   const [editName, setEditName] = useState('');
   const [editTags, setEditTags] = useState('');
-  const queryFilters = { ...filters, includeDeleted: isDeletedView || filters.includeDeleted };
+  const queryFilters = { ...filters, includeDeleted: isDeletedView };
   const { data, isLoading } = useQuery({ queryKey: ['documents', queryFilters], queryFn: () => documentApi.list(queryFilters) });
   const docs = isDeletedView ? (data?.rows || []).filter((doc) => doc.isDeleted) : (data?.rows || []);
   useEffect(() => {
@@ -60,7 +61,12 @@ export function DocumentVault() {
       {!doc.isDeleted && <button className="icon-button" onClick={() => setEditTarget(doc)} title="Rename"><Pencil size={17} /></button>}
       {!doc.isDeleted && <button className="icon-button" onClick={() => mutate(() => documentApi.favorite(doc.id), 'Favorite updated')} title="Favorite"><Heart size={17} fill={doc.isFavorite ? 'currentColor' : 'none'} /></button>}
       {!doc.isDeleted && <button className="icon-button" onClick={() => download(doc)} title="Download"><Download size={17} /></button>}
-      {doc.isDeleted ? <button className="icon-button" onClick={() => mutate(() => documentApi.restore(doc.id), 'Document restored')} title="Restore"><RotateCcw size={17} /></button> : <button className="icon-button text-rose-700" onClick={() => setDeleteTarget(doc)} title="Delete"><Trash2 size={17} /></button>}
+      {doc.isDeleted ? (
+        <>
+          <button className="icon-button" onClick={() => mutate(() => documentApi.restore(doc.id), 'Document restored')} title="Restore"><RotateCcw size={17} /></button>
+          <button className="icon-button text-rose-700" onClick={() => setPermanentDeleteTarget(doc)} title="Delete permanently"><Trash2 size={17} /></button>
+        </>
+      ) : <button className="icon-button text-rose-700" onClick={() => setDeleteTarget(doc)} title="Delete"><Trash2 size={17} /></button>}
     </div>
   );
 
@@ -79,7 +85,7 @@ export function DocumentVault() {
     },
     { header: 'Type', cell: ({ row }) => <span className="document-type-pill">{row.original.fileExtension.toUpperCase()}</span> },
     { header: 'Size', cell: ({ row }) => formatBytes(row.original.fileSize) },
-    { header: isDeletedView ? 'Deleted' : 'Uploaded', cell: ({ row }) => new Date(row.original.uploadedAt).toLocaleDateString() },
+    { header: 'Uploaded', cell: ({ row }) => new Date(row.original.uploadedAt).toLocaleDateString() },
     { header: 'Tags', cell: ({ row }) => row.original.tags.length ? row.original.tags.slice(0, 3).join(', ') : '-' },
     { header: 'Actions', cell: ({ row }) => actionsFor(row.original) }
   ], [isDeletedView]);
@@ -93,9 +99,6 @@ export function DocumentVault() {
       <section className="page-panel">
         <div className="resource-filter-fields">
           <div className="relative flex-1"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={17} /><input className="form-field pl-10" placeholder="Search documents or tags" value={filters.search} onChange={(e) => setFilters({ ...filters, search: e.target.value, page: 1 })} /></div>
-          <select className="form-field max-w-36" value={filters.fileType} onChange={(e) => setFilters({ ...filters, fileType: e.target.value, page: 1 })}><option value="">All types</option><option value="pdf">PDF</option><option value="jpg">JPG</option><option value="png">PNG</option><option value="docx">DOCX</option><option value="txt">TXT</option></select>
-          <select className="form-field max-w-40" value={filters.sort} onChange={(e) => setFilters({ ...filters, sort: e.target.value })}><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="name">Name</option><option value="size">File size</option></select>
-          {!isDeletedView && <label className="flex items-center gap-2 text-sm font-bold"><input type="checkbox" checked={filters.includeDeleted} onChange={(e) => setFilters({ ...filters, includeDeleted: e.target.checked })} /> Deleted</label>}
         </div>
         <div className="mt-5">
           {isLoading && <p className="text-sm font-bold text-slate-500">Loading documents...</p>}
@@ -111,6 +114,7 @@ export function DocumentVault() {
         <div className="mt-5 flex items-center justify-between text-sm font-bold text-slate-500"><span>{isDeletedView ? docs.length : data?.total || 0} documents</span><span>Page {data?.page || 1} of {data?.pages || 1}</span></div>
       </section>
       <ConfirmDialog open={!!deleteTarget} title="Delete document?" message="The document will move to deleted items and can be restored later." confirmLabel="Delete" tone="danger" onCancel={() => setDeleteTarget(null)} onConfirm={() => deleteTarget && mutate(() => documentApi.delete(deleteTarget.id), 'Document deleted').then(() => setDeleteTarget(null))} />
+      <ConfirmDialog open={!!permanentDeleteTarget} title="Delete permanently?" message="This will permanently remove the document and it cannot be restored." confirmLabel="Delete Permanently" tone="danger" onCancel={() => setPermanentDeleteTarget(null)} onConfirm={() => permanentDeleteTarget && mutate(() => documentApi.permanentDelete(permanentDeleteTarget.id), 'Document permanently deleted').then(() => setPermanentDeleteTarget(null))} />
       {editTarget && (
         <div className="confirm-layer" role="presentation">
           <button className="confirm-backdrop" type="button" aria-label="Cancel rename" onClick={() => setEditTarget(null)} />
