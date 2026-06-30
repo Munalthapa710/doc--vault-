@@ -108,42 +108,6 @@ cd client
 npm run build
 ```
 
-## Deploy
-
-Render backend:
-
-- Service type: Web Service
-- Runtime: Docker
-- Root Directory: leave blank
-- Dockerfile Path: `./Dockerfile`
-- Add all backend environment variables in Render
-
-Vercel frontend:
-
-- Root Directory: `client`
-- Build Command: `npm run build`
-- Output Directory: `dist`
-- Add `VITE_API_URL` and `VITE_GOOGLE_CLIENT_ID`
-
-## Main API Areas
-
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-- `POST /api/auth/verify-login-otp`
-- `POST /api/auth/google-login`
-- `POST /api/auth/refresh-token`
-- `GET /api/auth/me`
-- `POST /api/documents/upload`
-- `GET /api/documents`
-- `GET /api/documents/{id}/preview`
-- `GET /api/documents/{id}/download`
-- `PUT /api/documents/{id}`
-- `DELETE /api/documents/{id}`
-- `POST /api/documents/{id}/restore`
-- `DELETE /api/documents/{id}/permanent`
-- `GET /api/dashboard/summary`
-- `GET /api/settings/profile`
-
 ## Security Notes
 
 - Passwords, OTPs, and refresh tokens are hashed before storage.
