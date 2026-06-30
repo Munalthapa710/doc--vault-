@@ -9,6 +9,7 @@ import { ConfirmDialog } from './ConfirmDialog';
 export function Layout() {
   const { logout, sidebarCollapsed, toggleSidebar, user } = useAppStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileMenuClosing, setMobileMenuClosing] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
   const navigate = useNavigate();
   const bottomPaths = new Set(['/', '/documents', '/documents/upload', '/settings']);
@@ -19,6 +20,19 @@ export function Layout() {
     await logout();
     setConfirmLogout(false);
     navigate('/login', { replace: true });
+  };
+
+  const openMobileMenu = () => {
+    setMobileMenuClosing(false);
+    setMobileMenuOpen(true);
+  };
+
+  const closeMobileMenu = () => {
+    setMobileMenuClosing(true);
+    window.setTimeout(() => {
+      setMobileMenuOpen(false);
+      setMobileMenuClosing(false);
+    }, 250);
   };
 
   return (
@@ -57,7 +71,7 @@ export function Layout() {
       <div className={clsx('app-main transition-all', sidebarCollapsed ? 'pl-[76px]' : 'pl-[244px]')}>
         <header className="topbar sticky top-0 z-30 flex h-16 items-center justify-between px-6">
           <div className="flex items-center gap-3">
-            <button className="icon-button mobile-drawer-trigger" type="button" onClick={() => setMobileMenuOpen(true)} title="Open menu" aria-label="Open menu"><Menu size={18} /></button>
+            <button className="icon-button mobile-drawer-trigger" type="button" onClick={openMobileMenu} title="Open menu" aria-label="Open menu"><Menu size={18} /></button>
           </div>
           <div className="flex items-center gap-2">
             <button className="hidden rounded-lg bg-white px-3 py-2 text-sm font-bold text-slate-600 shadow-sm sm:block">{user?.fullName || 'Vault user'}</button>
@@ -83,15 +97,15 @@ export function Layout() {
       </nav>
 
       {mobileMenuOpen && (
-        <div className="mobile-menu-layer">
-          <button className="mobile-menu-backdrop" type="button" aria-label="Close menu" onClick={() => setMobileMenuOpen(false)} />
+        <div className={clsx('mobile-menu-layer', mobileMenuClosing && 'closing')}>
+          <button className="mobile-menu-backdrop" type="button" aria-label="Close menu" onClick={closeMobileMenu} />
           <aside className="mobile-menu-panel" aria-label="Mobile navigation">
             <div className="mobile-menu-head">
               <div className="mobile-menu-brand">
                 <Shield />
                 <div><span className="eyebrow">Navigation</span><strong>Personal Vault</strong></div>
               </div>
-              <button className="icon-button" type="button" onClick={() => setMobileMenuOpen(false)} aria-label="Close menu"><X size={18} /></button>
+              <button className="icon-button" type="button" onClick={closeMobileMenu} aria-label="Close menu"><X size={18} /></button>
             </div>
             <nav className="mobile-menu-list">
               {navGroups.map((group) => (
@@ -100,7 +114,7 @@ export function Layout() {
                   <div className="mobile-menu-items">
                     {group.items.map((item) => {
                       const Icon = item.icon;
-                      return <NavLink key={item.path} to={item.path} end className={({ isActive }) => clsx('mobile-menu-link', isActive && 'active')} onClick={() => setMobileMenuOpen(false)}><Icon size={18} /><span>{item.title}</span></NavLink>;
+                      return <NavLink key={item.path} to={item.path} end className={({ isActive }) => clsx('mobile-menu-link', isActive && 'active')} onClick={closeMobileMenu}><Icon size={18} /><span>{item.title}</span></NavLink>;
                     })}
                   </div>
                 </section>
