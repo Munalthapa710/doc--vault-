@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Download, Eye, File, Heart, RotateCcw, Search, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { api, documentApi, DocumentItem, storageKeys } from '../api';
+import { api, documentApi, DocumentItem } from '../api';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 
 const formatBytes = (bytes: number) => bytes < 1048576 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / 1048576).toFixed(1)} MB`;
@@ -14,7 +14,6 @@ export function DocumentVault() {
   const [deleteTarget, setDeleteTarget] = useState<DocumentItem | null>(null);
   const { data, isLoading } = useQuery({ queryKey: ['documents', filters], queryFn: () => documentApi.list(filters) });
   const docs = data?.rows || [];
-  const authHeader = useMemo(() => ({ Authorization: `Bearer ${localStorage.getItem(storageKeys.accessToken) || ''}` }), []);
 
   const mutate = async (action: () => Promise<unknown>, message: string) => {
     await action();
