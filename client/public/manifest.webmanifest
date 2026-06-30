@@ -14,32 +14,32 @@
   "lang": "en",
   "categories": ["productivity", "utilities"],
   "icons": [
-    { "src": "/logoaearan.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any maskable" }
+    { "src": "/vaultlogo.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any maskable" }
   ],
   "shortcuts": [
     {
       "name": "Dashboard",
       "short_name": "Dashboard",
       "url": "/",
-      "icons": [{ "src": "/logoaearan.png", "sizes": "1024x1024", "type": "image/png" }]
+      "icons": [{ "src": "/vaultlogo.png", "sizes": "1024x1024", "type": "image/png" }]
     },
     {
       "name": "Documents",
       "short_name": "Docs",
       "url": "/documents",
-      "icons": [{ "src": "/logoaearan.png", "sizes": "1024x1024", "type": "image/png" }]
+      "icons": [{ "src": "/vaultlogo.png", "sizes": "1024x1024", "type": "image/png" }]
     },
     {
       "name": "Upload",
       "short_name": "Upload",
       "url": "/documents/upload",
-      "icons": [{ "src": "/logoaearan.png", "sizes": "1024x1024", "type": "image/png" }]
+      "icons": [{ "src": "/vaultlogo.png", "sizes": "1024x1024", "type": "image/png" }]
     },
     {
       "name": "Settings",
       "short_name": "Settings",
       "url": "/settings",
-      "icons": [{ "src": "/logoaearan.png", "sizes": "1024x1024", "type": "image/png" }]
+      "icons": [{ "src": "/vaultlogo.png", "sizes": "1024x1024", "type": "image/png" }]
     }
   ]
 }

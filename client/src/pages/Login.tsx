@@ -1,7 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { LockKeyhole, ShieldCheck } from 'lucide-react';
+import { LockKeyhole } from 'lucide-react';
 import { useAppStore } from '../store';
 
 export function Login({ mode = 'password' }: { mode?: 'password' | 'otp' }) {
@@ -54,7 +54,7 @@ export function Login({ mode = 'password' }: { mode?: 'password' | 'otp' }) {
     <main className="grid min-h-screen place-items-center bg-slate-50 px-4 py-8">
       <form onSubmit={submit} className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
         <div className="mb-6 flex items-center gap-3">
-          <span className="grid h-12 w-12 place-items-center rounded-xl bg-cyan-600 text-white"><ShieldCheck /></span>
+          <img className="login-logo" src="/vaultlogo.png" alt="Personal Vault" />
           <div><span className="eyebrow">Personal Vault</span><h1 className="text-2xl font-black">{mode === 'otp' ? 'Verify login OTP' : 'Secure sign in'}</h1></div>
         </div>
         <div className="grid gap-4">

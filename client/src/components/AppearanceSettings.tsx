@@ -109,7 +109,7 @@ export function AppearanceSettings() {
           <div className="mt-5 overflow-hidden rounded-xl border border-slate-200">
             <div className="p-4" style={{ background: settings.sidebarColor }}>
               <div className="mb-3 flex items-center gap-2">
-                <div className="grid h-9 w-9 place-items-center rounded-lg text-white" style={{ background: settings.primaryColor }}>A</div>
+                <img className="h-9 w-9 object-contain" src="/vaultlogo.png" alt="Personal Vault" />
                 <strong style={{ color: settings.textColor }}>Personal Vault</strong>
               </div>
               <div className="rounded-lg px-3 py-2 text-sm font-black text-white" style={{ background: settings.primaryColor }}>Active Menu</div>

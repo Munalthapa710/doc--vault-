@@ -23,7 +23,10 @@ export function Register() {
   return (
     <main className="grid min-h-screen place-items-center bg-slate-50 px-4 py-8">
       <form onSubmit={submit} className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
-        <span className="eyebrow">Personal Vault</span><h1 className="mb-5 text-2xl font-black">Create account</h1>
+        <div className="mb-6 flex items-center gap-3">
+          <img className="login-logo" src="/vaultlogo.png" alt="Personal Vault" />
+          <div><span className="eyebrow">Personal Vault</span><h1 className="text-2xl font-black">Create account</h1></div>
+        </div>
         <div className="grid gap-4">
           <input className="form-field" placeholder="Full name" value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} required />
           <input className="form-field" type="email" placeholder="Email address" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />

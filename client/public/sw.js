@@ -1,10 +1,10 @@
-const SHELL_CACHE = 'personal-vault-shell-v1';
+const SHELL_CACHE = 'personal-vault-shell-v2';
 const RUNTIME_CACHE = 'personal-vault-runtime-v1';
 const APP_SHELL = [
   '/',
   '/offline.html',
   '/manifest.webmanifest',
-  '/logoaearan.png'
+  '/vaultlogo.png'
 ];
 
 self.addEventListener('install', (event) => {

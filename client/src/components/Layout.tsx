@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { Bell, ChevronLeft, ChevronRight, LogOut, Menu, Shield, X } from 'lucide-react';
+import { Bell, ChevronLeft, ChevronRight, LogOut, Menu, X } from 'lucide-react';
 import clsx from 'clsx';
 import { navGroups } from '../navigation';
 import { useAppStore } from '../store';
@@ -39,7 +39,7 @@ export function Layout() {
     <div className="app-shell min-h-screen text-slate-950">
       <aside className={clsx('vault-sidebar fixed inset-y-0 left-0 z-40 flex flex-col transition-all', sidebarCollapsed ? 'w-[76px]' : 'w-[244px]')}>
         <div className="sidebar-brand">
-          <div className="brand-mark grid place-items-center rounded-xl bg-cyan-600 text-white"><Shield size={26} /></div>
+          <img className="brand-mark" src="/vaultlogo.png" alt="Personal Vault" />
           {!sidebarCollapsed && <strong className="block truncate text-[15px]">Personal Vault</strong>}
         </div>
         <nav className="sidebar-scroll flex-1 overflow-y-auto px-3 py-4">
@@ -102,7 +102,7 @@ export function Layout() {
           <aside className="mobile-menu-panel" aria-label="Mobile navigation">
             <div className="mobile-menu-head">
               <div className="mobile-menu-brand">
-                <Shield />
+                <img src="/vaultlogo.png" alt="Personal Vault" />
                 <div><span className="eyebrow">Navigation</span><strong>Personal Vault</strong></div>
               </div>
               <button className="icon-button" type="button" onClick={closeMobileMenu} aria-label="Close menu"><X size={18} /></button>
