@@ -58,11 +58,6 @@ export function Layout() {
         <header className="topbar sticky top-0 z-30 flex h-16 items-center justify-between px-6">
           <div className="flex items-center gap-3">
             <button className="icon-button mobile-drawer-trigger" type="button" onClick={() => setMobileMenuOpen(true)} title="Open menu" aria-label="Open menu"><Menu size={18} /></button>
-            <div className="mobile-top-title">
-              <Shield aria-hidden="true" />
-              <strong>Personal</strong>
-              <span>Vault</span>
-            </div>
           </div>
           <div className="flex items-center gap-2">
             <button className="hidden rounded-lg bg-white px-3 py-2 text-sm font-bold text-slate-600 shadow-sm sm:block">{user?.fullName || 'Vault user'}</button>
