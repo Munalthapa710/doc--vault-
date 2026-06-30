@@ -4,6 +4,7 @@ namespace PersonalVault.Api.ViewModel.Auth;
 
 public record RegisterRequest([Required] string FullName, [Required, EmailAddress] string Email, [Required] string Password);
 public record LoginRequest([Required, EmailAddress] string Email, [Required] string Password);
+public record SecretWordLoginRequest([Required, EmailAddress] string Email, [Required] string Password, [Required, MinLength(4)] string SecretWord);
 public record VerifyOtpRequest([Required, EmailAddress] string Email, [Required] string Otp, string Purpose);
 public record ResendOtpRequest([Required, EmailAddress] string Email, [Required] string Purpose);
 public record GoogleLoginRequest([Required] string IdToken);
@@ -11,6 +12,7 @@ public record RefreshTokenRequest([Required] string RefreshToken);
 public record ForgotPasswordRequest([Required, EmailAddress] string Email);
 public record ResetPasswordRequest([Required, EmailAddress] string Email, [Required] string Otp, [Required] string NewPassword);
 public record ChangePasswordRequest(string? CurrentPassword, [Required] string NewPassword);
+public record UpdateSecretWordRequest([Required, MinLength(4)] string SecretWord);
 public record UpdateProfileRequest([Required] string FullName, bool? EmailOtpLoginEnabled);
 
 public class UserResponse
@@ -22,6 +24,7 @@ public class UserResponse
     public bool IsEmailVerified { get; set; }
     public bool MustChangePassword { get; set; }
     public bool HasLocalPassword { get; set; }
+    public bool HasSecretWord { get; set; }
     public bool EmailOtpLoginEnabled { get; set; }
     public DateTime? LastLoginAt { get; set; }
 }

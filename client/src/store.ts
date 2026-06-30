@@ -6,6 +6,7 @@ type AppState = {
   pendingLoginEmail: string;
   sidebarCollapsed: boolean;
   requestLoginOtp: (email: string, password: string) => Promise<void>;
+  loginWithSecretWord: (email: string, password: string, secretWord: string) => Promise<void>;
   verifyLoginOtp: (email: string, otp: string) => Promise<void>;
   setSession: (accessToken: string, refreshToken: string, user: User) => void;
   refreshMe: () => Promise<void>;
@@ -34,6 +35,10 @@ export const useAppStore = create<AppState>((set, get) => ({
     await authApi.login(email, password);
     sessionStorage.setItem('personalVault.pendingLoginEmail', email);
     set({ pendingLoginEmail: email });
+  },
+  loginWithSecretWord: async (email, password, secretWord) => {
+    const response = await authApi.loginWithSecretWord(email, password, secretWord);
+    get().setSession(response.accessToken, response.refreshToken, response.user);
   },
   verifyLoginOtp: async (email, otp) => {
     const response = await authApi.verifyLoginOtp(email, otp);

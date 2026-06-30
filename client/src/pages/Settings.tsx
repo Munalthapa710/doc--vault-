@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { authApi, settingsApi } from '../api';
+import { authApi, settingsApi, storageKeys } from '../api';
 import { AppearanceSettings } from '../components/AppearanceSettings';
 import { useAppStore } from '../store';
 
@@ -10,6 +10,7 @@ export function Settings() {
   const [emailOtpLoginEnabled, setEmailOtpLoginEnabled] = useState(user?.emailOtpLoginEnabled ?? true);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [secretWord, setSecretWord] = useState('');
   const mustSetPassword = !!user?.mustChangePassword;
   useEffect(() => { setFullName(user?.fullName || ''); setEmailOtpLoginEnabled(user?.emailOtpLoginEnabled ?? true); }, [user]);
   const submit = async (event: FormEvent) => {
@@ -28,6 +29,18 @@ export function Settings() {
       toast.success(user?.hasLocalPassword ? 'Password changed' : 'Local password created');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Unable to update password');
+    }
+  };
+  const saveSecretWord = async (event: FormEvent) => {
+    event.preventDefault();
+    try {
+      const updated = await settingsApi.updateSecretWord(secretWord);
+      localStorage.setItem(storageKeys.user, JSON.stringify(updated));
+      await refreshMe();
+      setSecretWord('');
+      toast.success('Secret word updated');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Unable to update secret word');
     }
   };
   return (
@@ -56,6 +69,17 @@ export function Settings() {
             <button className="btn-primary">Save Password</button>
           </div>
         </form>
+        {!mustSetPassword && (
+          <form onSubmit={saveSecretWord} className="page-panel">
+            <h2 className="panel-title">{user?.hasSecretWord ? 'Edit Secret Word' : 'Set Secret Word'}</h2>
+            <div className="grid gap-3">
+              <p className="text-sm font-bold text-slate-500">Use this as an alternative to OTP after entering your email and password. It is stored securely and cannot be viewed later.</p>
+              <input className="form-field" type="password" placeholder="Secret word" value={secretWord} onChange={(e) => setSecretWord(e.target.value)} minLength={4} required />
+              <div className="rounded-xl bg-slate-50 p-3 text-sm font-bold text-slate-600">Status: {user?.hasSecretWord ? 'Secret word set' : 'Not set'}</div>
+              <button className="btn-primary">Save Secret Word</button>
+            </div>
+          </form>
+        )}
       </section>
       {!mustSetPassword && <AppearanceSettings />}
     </div>

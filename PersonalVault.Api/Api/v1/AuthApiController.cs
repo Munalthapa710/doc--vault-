@@ -22,6 +22,9 @@ public class AuthApiController(IAuthService authService, ITokenService tokenServ
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginRequest request) { await authService.LoginAsync(request, HttpContext); return HttpResponse(200, "OTP sent to registered email."); }
 
+    [HttpPost("login-secret-word")]
+    public async Task<IActionResult> LoginWithSecretWord(SecretWordLoginRequest request) => HttpResponse(200, "Login successful.", await authService.LoginWithSecretWordAsync(request, HttpContext));
+
     [HttpPost("verify-login-otp")]
     public async Task<IActionResult> VerifyLoginOtp(VerifyOtpRequest request) => HttpResponse(200, "Login successful.", await authService.VerifyLoginOtpAsync(request with { Purpose = "Login" }, HttpContext));
 

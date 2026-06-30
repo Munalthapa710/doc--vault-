@@ -6,10 +6,12 @@ import { useAppStore } from '../store';
 
 export function Login({ mode = 'password' }: { mode?: 'password' | 'otp' }) {
   const navigate = useNavigate();
-  const { requestLoginOtp, verifyLoginOtp, pendingLoginEmail } = useAppStore();
+  const { requestLoginOtp, loginWithSecretWord, verifyLoginOtp, pendingLoginEmail } = useAppStore();
   const [email, setEmail] = useState(pendingLoginEmail);
   const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
+  const [secretWord, setSecretWord] = useState('');
+  const [loginMethod, setLoginMethod] = useState<'otp' | 'secret'>('otp');
   const [loading, setLoading] = useState(false);
 
   const submit = async (event: FormEvent) => {
@@ -18,6 +20,10 @@ export function Login({ mode = 'password' }: { mode?: 'password' | 'otp' }) {
     try {
       if (mode === 'otp') {
         await verifyLoginOtp(email, otp);
+        toast.success('Signed in securely');
+        navigate('/', { replace: true });
+      } else if (loginMethod === 'secret') {
+        await loginWithSecretWord(email, password, secretWord);
         toast.success('Signed in securely');
         navigate('/', { replace: true });
       } else {
@@ -62,9 +68,16 @@ export function Login({ mode = 'password' }: { mode?: 'password' | 'otp' }) {
           {mode === 'otp' ? (
             <input className="form-field" inputMode="numeric" maxLength={6} placeholder="6-digit OTP" value={otp} onChange={(e) => setOtp(e.target.value)} required />
           ) : (
-            <input className="form-field" type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <>
+              <div className="grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1">
+                <button className={loginMethod === 'otp' ? 'btn-primary min-h-9' : 'btn-secondary min-h-9'} type="button" onClick={() => setLoginMethod('otp')}>OTP</button>
+                <button className={loginMethod === 'secret' ? 'btn-primary min-h-9' : 'btn-secondary min-h-9'} type="button" onClick={() => setLoginMethod('secret')}>Secret word</button>
+              </div>
+              <input className="form-field" type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              {loginMethod === 'secret' && <input className="form-field" type="password" placeholder="Secret word" value={secretWord} onChange={(e) => setSecretWord(e.target.value)} minLength={4} required />}
+            </>
           )}
-          <button className="btn-primary w-full" disabled={loading}><LockKeyhole size={18} />{loading ? 'Please wait...' : mode === 'otp' ? 'Verify OTP' : 'Send OTP'}</button>
+          <button className="btn-primary w-full" disabled={loading}><LockKeyhole size={18} />{loading ? 'Please wait...' : mode === 'otp' ? 'Verify OTP' : loginMethod === 'secret' ? 'Sign In' : 'Send OTP'}</button>
           {mode !== 'otp' && <button className="btn-secondary w-full" type="button" onClick={startGoogleLogin}>Continue with Google</button>}
         </div>
         <div className="mt-5 flex flex-wrap justify-between gap-3 text-sm font-bold text-cyan-700">

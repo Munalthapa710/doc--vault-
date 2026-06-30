@@ -41,6 +41,22 @@ public class AuthService(ApplicationDbContext context, IOtpService otpService, I
         await otpService.SendOtpAsync(user, "Login", httpContext, false);
     }
 
+    public async Task<TokenResponse> LoginWithSecretWordAsync(SecretWordLoginRequest request, HttpContext httpContext)
+    {
+        var user = await FindByEmail(request.Email);
+        if (user is null || !user.IsActive || user.IsDeleted || user.LockoutEndAt > DateTime.UtcNow || !SecurityHelpers.VerifyPassword(user, request.Password) || !SecurityHelpers.VerifySecretWord(user, request.SecretWord))
+        {
+            if (user is not null) await RegisterFailedLogin(user);
+            await auditLogService.LogAsync(user?.Id, "Login failed", httpContext);
+            throw new UnauthorizedAccessException("Invalid email, password, or secret word.");
+        }
+
+        await context.Users.UpdateOneAsync(x => x.Id == user.Id, Builders<User>.Update.Set(x => x.FailedLoginCount, 0).Unset(x => x.LockoutEndAt).Set(x => x.LastLoginAt, DateTime.UtcNow).Set(x => x.UpdatedAt, DateTime.UtcNow));
+        user.LastLoginAt = DateTime.UtcNow;
+        await auditLogService.LogAsync(user.Id, "Login success with secret word", httpContext);
+        return await tokenService.IssueTokensAsync(user, httpContext);
+    }
+
     public async Task<TokenResponse> VerifyLoginOtpAsync(VerifyOtpRequest request, HttpContext httpContext)
     {
         var user = await FindByEmail(request.Email) ?? throw new UnauthorizedAccessException("Invalid OTP.");
@@ -123,6 +139,16 @@ public class AuthService(ApplicationDbContext context, IOtpService otpService, I
         await auditLogService.LogAsync(user.Id, "Password changed", httpContext);
     }
 
+    public async Task UpdateSecretWordAsync(string userId, UpdateSecretWordRequest request, HttpContext httpContext)
+    {
+        var secretWord = request.SecretWord.Trim();
+        if (secretWord.Length < 4) throw new InvalidOperationException("Secret word must be at least 4 characters.");
+        var user = await context.Users.Find(x => x.Id == userId && !x.IsDeleted).FirstOrDefaultAsync() ?? throw new UnauthorizedAccessException();
+        user.SecretWordHash = SecurityHelpers.HashSecretWord(user, secretWord);
+        await context.Users.UpdateOneAsync(x => x.Id == user.Id, Builders<User>.Update.Set(x => x.SecretWordHash, user.SecretWordHash).Set(x => x.UpdatedAt, DateTime.UtcNow));
+        await auditLogService.LogAsync(user.Id, "Secret word updated", httpContext);
+    }
+
     public async Task<UserResponse> GetMeAsync(string userId)
     {
         var user = await context.Users.Find(x => x.Id == userId && !x.IsDeleted).FirstOrDefaultAsync() ?? throw new UnauthorizedAccessException();
@@ -160,6 +186,7 @@ public class AuthService(ApplicationDbContext context, IOtpService otpService, I
         IsEmailVerified = user.IsEmailVerified,
         MustChangePassword = user.MustChangePassword,
         HasLocalPassword = user.HasLocalPassword,
+        HasSecretWord = user.HasSecretWord,
         EmailOtpLoginEnabled = user.EmailOtpLoginEnabled,
         LastLoginAt = user.LastLoginAt
     };

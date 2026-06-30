@@ -7,6 +7,7 @@ public interface IAuthService
 {
     Task RegisterAsync(RegisterRequest request, HttpContext httpContext);
     Task LoginAsync(LoginRequest request, HttpContext httpContext);
+    Task<TokenResponse> LoginWithSecretWordAsync(SecretWordLoginRequest request, HttpContext httpContext);
     Task<TokenResponse> VerifyLoginOtpAsync(VerifyOtpRequest request, HttpContext httpContext);
     Task VerifyEmailOtpAsync(VerifyOtpRequest request, HttpContext httpContext);
     Task ResendOtpAsync(ResendOtpRequest request, HttpContext httpContext);
@@ -14,6 +15,7 @@ public interface IAuthService
     Task ForgotPasswordAsync(ForgotPasswordRequest request, HttpContext httpContext);
     Task ResetPasswordAsync(ResetPasswordRequest request, HttpContext httpContext);
     Task ChangePasswordAsync(string userId, ChangePasswordRequest request, HttpContext httpContext);
+    Task UpdateSecretWordAsync(string userId, UpdateSecretWordRequest request, HttpContext httpContext);
     Task<UserResponse> GetMeAsync(string userId);
 }
 

@@ -31,6 +31,13 @@ public class SettingsApiController(ApplicationDbContext context, IAuthService au
     [HttpGet("security")]
     public async Task<IActionResult> Security() => HttpResponse(200, "Security settings fetched successfully.", await authService.GetMeAsync(UserId()));
 
+    [HttpPost("secret-word")]
+    public async Task<IActionResult> UpdateSecretWord(UpdateSecretWordRequest request)
+    {
+        await authService.UpdateSecretWordAsync(UserId(), request, HttpContext);
+        return HttpResponse(200, "Secret word updated successfully.", await authService.GetMeAsync(UserId()));
+    }
+
     [HttpGet("sessions")]
     public async Task<IActionResult> Sessions() => HttpResponse(200, "Active sessions fetched successfully.", await tokenService.GetSessionsAsync(UserId()));
 

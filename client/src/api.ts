@@ -58,6 +58,7 @@ export type User = {
   isEmailVerified: boolean;
   mustChangePassword: boolean;
   hasLocalPassword: boolean;
+  hasSecretWord: boolean;
   emailOtpLoginEnabled: boolean;
   lastLoginAt?: string;
 };
@@ -101,6 +102,7 @@ export const authApi = {
   register: (payload: { fullName: string; email: string; password: string }) => api.post('/auth/register', payload),
   verifyEmailOtp: (email: string, otp: string) => api.post('/auth/verify-email-otp', { email, otp, purpose: 'EmailVerification' }),
   login: (email: string, password: string) => api.post('/auth/login', { email, password }),
+  loginWithSecretWord: async (email: string, password: string, secretWord: string) => unwrap<{ accessToken: string; refreshToken: string; user: User }>(await api.post('/auth/login-secret-word', { email, password, secretWord })),
   verifyLoginOtp: async (email: string, otp: string) => unwrap<{ accessToken: string; refreshToken: string; user: User }>(await api.post('/auth/verify-login-otp', { email, otp, purpose: 'Login' })),
   forgotPassword: (email: string) => api.post('/auth/forgot-password', { email }),
   resetPassword: (email: string, otp: string, newPassword: string) => api.post('/auth/reset-password', { email, otp, newPassword }),
@@ -134,6 +136,7 @@ export const dashboardApi = {
 export const settingsApi = {
   profile: async () => unwrap<User>(await api.get('/settings/profile')),
   updateProfile: async (payload: { fullName: string; emailOtpLoginEnabled?: boolean }) => unwrap<User>(await api.put('/settings/profile', payload)),
+  updateSecretWord: async (secretWord: string) => unwrap<User>(await api.post('/settings/secret-word', { secretWord })),
   security: async () => unwrap<User>(await api.get('/settings/security')),
   sessions: async () => unwrap<Array<{ id: string; createdAt: string; expiresAt: string; ipAddress: string; userAgent: string }>>(await api.get('/settings/sessions'))
 };

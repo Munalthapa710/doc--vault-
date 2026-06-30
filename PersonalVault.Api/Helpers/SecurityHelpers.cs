@@ -16,6 +16,8 @@ public static class SecurityHelpers
     public static bool IsStrongPassword(string password) => StrongPassword.IsMatch(password);
     public static string HashPassword(User user, string password) => PasswordHasher.HashPassword(user, password);
     public static bool VerifyPassword(User user, string password) => user.PasswordHash is not null && PasswordHasher.VerifyHashedPassword(user, user.PasswordHash, password) != PasswordVerificationResult.Failed;
+    public static string HashSecretWord(User user, string secretWord) => PasswordHasher.HashPassword(user, secretWord.Trim());
+    public static bool VerifySecretWord(User user, string secretWord) => user.SecretWordHash is not null && PasswordHasher.VerifyHashedPassword(user, user.SecretWordHash, secretWord.Trim()) != PasswordVerificationResult.Failed;
 
     public static string GenerateSecureToken(int bytes = 64)
     {

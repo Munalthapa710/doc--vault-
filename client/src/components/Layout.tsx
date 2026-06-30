@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { Bell, ChevronLeft, ChevronRight, LogOut, Menu, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, LogOut, Menu, X } from 'lucide-react';
 import clsx from 'clsx';
 import { navGroups } from '../navigation';
 import { useAppStore } from '../store';
@@ -79,7 +79,6 @@ export function Layout() {
           </div>
           <div className="flex items-center gap-2">
             <button className="hidden rounded-lg bg-white px-3 py-2 text-sm font-bold text-slate-600 shadow-sm sm:block">{user?.fullName || 'Vault user'}</button>
-            <button className="icon-button" type="button" title="Security alerts" aria-label="Security alerts"><Bell size={18} /></button>
             <button className="icon-button text-rose-700" type="button" onClick={() => setConfirmLogout(true)} title="Logout" aria-label="Log out"><LogOut size={18} /></button>
           </div>
         </header>

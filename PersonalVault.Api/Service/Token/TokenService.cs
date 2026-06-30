@@ -96,6 +96,7 @@ public class TokenService(ApplicationDbContext context, IOptions<JwtSettings> op
         IsEmailVerified = user.IsEmailVerified,
         MustChangePassword = user.MustChangePassword,
         HasLocalPassword = user.HasLocalPassword,
+        HasSecretWord = user.HasSecretWord,
         EmailOtpLoginEnabled = user.EmailOtpLoginEnabled,
         LastLoginAt = user.LastLoginAt
     };
