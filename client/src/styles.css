@@ -745,6 +745,60 @@ textarea {
   object-fit: cover;
 }
 
+.document-table-name {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-width: 240px;
+}
+
+.document-table-name strong {
+  display: block;
+  color: var(--app-text);
+  font-weight: 900;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.document-table-name span {
+  display: block;
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.document-type-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 54px;
+  border-radius: 999px;
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
+  padding: 5px 9px;
+  font-size: 0.72rem;
+  font-weight: 950;
+}
+
+.table-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.desktop-table-wrap td:last-child,
+.desktop-table-wrap th:last-child {
+  text-align: right;
+}
+
 .dashboard-shell {
   display: grid;
   gap: 22px;

@@ -1,10 +1,12 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { type ColumnDef } from '@tanstack/react-table';
 import { Download, Eye, File, Heart, Pencil, RotateCcw, Search, Trash2, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { api, documentApi, DocumentItem } from '../api';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { DataTable } from '../components/DataTable';
 
 const formatBytes = (bytes: number) => bytes < 1048576 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / 1048576).toFixed(1)} MB`;
 
@@ -52,6 +54,36 @@ export function DocumentVault() {
     queryClient.invalidateQueries({ queryKey: ['document', editTarget.id] });
   };
 
+  const actionsFor = (doc: DocumentItem) => (
+    <div className="table-actions">
+      {!doc.isDeleted && <Link className="icon-button" to={`/documents/${doc.id}`} title="Preview"><Eye size={17} /></Link>}
+      {!doc.isDeleted && <button className="icon-button" onClick={() => setEditTarget(doc)} title="Rename"><Pencil size={17} /></button>}
+      {!doc.isDeleted && <button className="icon-button" onClick={() => mutate(() => documentApi.favorite(doc.id), 'Favorite updated')} title="Favorite"><Heart size={17} fill={doc.isFavorite ? 'currentColor' : 'none'} /></button>}
+      {!doc.isDeleted && <button className="icon-button" onClick={() => download(doc)} title="Download"><Download size={17} /></button>}
+      {doc.isDeleted ? <button className="icon-button" onClick={() => mutate(() => documentApi.restore(doc.id), 'Document restored')} title="Restore"><RotateCcw size={17} /></button> : <button className="icon-button text-rose-700" onClick={() => setDeleteTarget(doc)} title="Delete"><Trash2 size={17} /></button>}
+    </div>
+  );
+
+  const columns = useMemo<ColumnDef<DocumentItem>[]>(() => [
+    {
+      header: 'Document',
+      cell: ({ row }) => (
+        <div className="document-table-name">
+          <DocumentThumb doc={row.original} />
+          <div>
+            <strong>{row.original.displayName}</strong>
+            <span>{row.original.originalFileName}</span>
+          </div>
+        </div>
+      )
+    },
+    { header: 'Type', cell: ({ row }) => <span className="document-type-pill">{row.original.fileExtension.toUpperCase()}</span> },
+    { header: 'Size', cell: ({ row }) => formatBytes(row.original.fileSize) },
+    { header: isDeletedView ? 'Deleted' : 'Uploaded', cell: ({ row }) => new Date(row.original.uploadedAt).toLocaleDateString() },
+    { header: 'Tags', cell: ({ row }) => row.original.tags.length ? row.original.tags.slice(0, 3).join(', ') : '-' },
+    { header: 'Actions', cell: ({ row }) => actionsFor(row.original) }
+  ], [isDeletedView]);
+
   return (
     <div className="grid gap-5">
       <section className="page-header">
@@ -65,27 +97,16 @@ export function DocumentVault() {
           <select className="form-field max-w-40" value={filters.sort} onChange={(e) => setFilters({ ...filters, sort: e.target.value })}><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="name">Name</option><option value="size">File size</option></select>
           {!isDeletedView && <label className="flex items-center gap-2 text-sm font-bold"><input type="checkbox" checked={filters.includeDeleted} onChange={(e) => setFilters({ ...filters, includeDeleted: e.target.checked })} /> Deleted</label>}
         </div>
-        <div className="mt-5 grid gap-3">
+        <div className="mt-5">
           {isLoading && <p className="text-sm font-bold text-slate-500">Loading documents...</p>}
-          {!isLoading && docs.length === 0 && <p className="rounded-xl bg-slate-50 p-6 text-center text-sm font-bold text-slate-500">{isDeletedView ? 'No deleted documents found.' : 'No documents match this view.'}</p>}
-          {docs.map((doc) => (
-            <article key={doc.id} className="mobile-list-row rounded-xl border border-slate-200 bg-white shadow-sm">
-              <DocumentThumb doc={doc} />
-              <div className="mobile-list-main">
-                <strong>{doc.displayName}</strong>
-                <div className="mobile-list-meta"><span>{doc.fileExtension.toUpperCase()}</span><span>{formatBytes(doc.fileSize)}</span><span>{new Date(doc.uploadedAt).toLocaleDateString()}</span></div>
-              </div>
-              <div className="mobile-data-actions">
-                <div>
-                  {!doc.isDeleted && <Link className="icon-button" to={`/documents/${doc.id}`} title="Preview"><Eye size={17} /></Link>}
-                  {!doc.isDeleted && <button className="icon-button" onClick={() => setEditTarget(doc)} title="Rename"><Pencil size={17} /></button>}
-                  {!doc.isDeleted && <button className="icon-button" onClick={() => mutate(() => documentApi.favorite(doc.id), 'Favorite updated')} title="Favorite"><Heart size={17} fill={doc.isFavorite ? 'currentColor' : 'none'} /></button>}
-                  {!doc.isDeleted && <button className="icon-button" onClick={() => download(doc)} title="Download"><Download size={17} /></button>}
-                  {doc.isDeleted ? <button className="icon-button" onClick={() => mutate(() => documentApi.restore(doc.id), 'Document restored')} title="Restore"><RotateCcw size={17} /></button> : <button className="icon-button text-rose-700" onClick={() => setDeleteTarget(doc)} title="Delete"><Trash2 size={17} /></button>}
-                </div>
-              </div>
-            </article>
-          ))}
+          {!isLoading && (
+            <DataTable
+              rows={docs}
+              columns={columns}
+              emptyTitle={isDeletedView ? 'No deleted documents found.' : 'No documents match this view.'}
+              renderMobileCard={(doc) => <DocumentMobileRow doc={doc} actions={actionsFor(doc)} />}
+            />
+          )}
         </div>
         <div className="mt-5 flex items-center justify-between text-sm font-bold text-slate-500"><span>{isDeletedView ? docs.length : data?.total || 0} documents</span><span>Page {data?.page || 1} of {data?.pages || 1}</span></div>
       </section>
@@ -137,5 +158,18 @@ function DocumentThumb({ doc }: { doc: DocumentItem }) {
     <span className="mobile-list-thumb">
       {previewUrl ? <img src={previewUrl} alt={doc.displayName} loading="lazy" /> : <File size={22} />}
     </span>
+  );
+}
+
+function DocumentMobileRow({ doc, actions }: { doc: DocumentItem; actions: ReactNode }) {
+  return (
+    <article className="mobile-list-row rounded-xl border border-slate-200 bg-white shadow-sm">
+      <DocumentThumb doc={doc} />
+      <div className="mobile-list-main">
+        <strong>{doc.displayName}</strong>
+        <div className="mobile-list-meta"><span>{doc.fileExtension.toUpperCase()}</span><span>{formatBytes(doc.fileSize)}</span><span>{new Date(doc.uploadedAt).toLocaleDateString()}</span></div>
+      </div>
+      <div className="mobile-data-actions">{actions}</div>
+    </article>
   );
 }
