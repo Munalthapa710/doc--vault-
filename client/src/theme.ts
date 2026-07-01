@@ -17,7 +17,19 @@ export const defaultAppearance: AppearanceSettings = {
 const storageKey = 'personalVault.appearance';
 
 const isHexColor = (value: string) => /^#[0-9A-Fa-f]{6}$/.test(value);
-const allowedFonts = new Set(['system', 'inter', 'serif', 'mono']);
+const allowedFonts = new Set([
+  'system',
+  'roboto',
+  'sf-pro',
+  'playfair-display',
+  'dm-sans',
+  'karla',
+  'overpass',
+  'fira-sans-condensed',
+  'inter',
+  'serif',
+  'mono'
+]);
 
 export const loadAppearance = (): AppearanceSettings => {
   try {
@@ -60,6 +72,13 @@ export const applyStoredAppearance = () => {
 };
 
 const resolveFontFamily = (font: string) => {
+  if (font === 'roboto') return '"Roboto", Arial, sans-serif';
+  if (font === 'sf-pro') return '"SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, ui-sans-serif, system-ui, sans-serif';
+  if (font === 'playfair-display') return '"Playfair Display", Georgia, "Times New Roman", serif';
+  if (font === 'dm-sans') return '"DM Sans", "Segoe UI", Arial, sans-serif';
+  if (font === 'karla') return '"Karla", "Segoe UI", Arial, sans-serif';
+  if (font === 'overpass') return '"Overpass", "Segoe UI", Arial, sans-serif';
+  if (font === 'fira-sans-condensed') return '"Fira Sans Condensed", "Arial Narrow", Arial, sans-serif';
   if (font === 'inter') return '"Inter", "Segoe UI", Arial, sans-serif';
   if (font === 'serif') return 'Georgia, "Times New Roman", serif';
   if (font === 'mono') return '"SFMono-Regular", Consolas, "Liberation Mono", monospace';

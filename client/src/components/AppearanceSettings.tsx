@@ -13,10 +13,29 @@ const fields: Array<{ key: Exclude<keyof AppearanceSettings, 'fontFamily'>; labe
 const presets = ['#0891b2', '#0f766e', '#7c3aed', '#be123c', '#4338ca', '#15803d'];
 const fontOptions = [
   { value: 'system', label: 'System Sans' },
-  { value: 'inter', label: 'Inter / Segoe' },
+  { value: 'roboto', label: 'Roboto' },
+  { value: 'sf-pro', label: 'San Francisco / SF Pro' },
+  { value: 'playfair-display', label: 'Playfair Display' },
+  { value: 'dm-sans', label: 'DM Sans' },
+  { value: 'karla', label: 'Karla' },
+  { value: 'overpass', label: 'Overpass' },
+  { value: 'fira-sans-condensed', label: 'Fira Sans Condensed' },
   { value: 'serif', label: 'Serif' },
   { value: 'mono', label: 'Mono' }
 ];
+
+const fontPreviewStack: Record<string, string> = {
+  system: '"SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, ui-sans-serif, system-ui, sans-serif',
+  roboto: '"Roboto", Arial, sans-serif',
+  'sf-pro': '"SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, ui-sans-serif, system-ui, sans-serif',
+  'playfair-display': '"Playfair Display", Georgia, "Times New Roman", serif',
+  'dm-sans': '"DM Sans", "Segoe UI", Arial, sans-serif',
+  karla: '"Karla", "Segoe UI", Arial, sans-serif',
+  overpass: '"Overpass", "Segoe UI", Arial, sans-serif',
+  'fira-sans-condensed': '"Fira Sans Condensed", "Arial Narrow", Arial, sans-serif',
+  serif: 'Georgia, "Times New Roman", serif',
+  mono: '"SFMono-Regular", Consolas, "Liberation Mono", monospace'
+};
 
 export function AppearanceSettings() {
   const [settings, setSettings] = useState<AppearanceSettings>(() => loadAppearance());
@@ -114,7 +133,14 @@ export function AppearanceSettings() {
               </div>
               <div className="rounded-lg px-3 py-2 text-sm font-black text-white" style={{ background: settings.primaryColor }}>Active Menu</div>
             </div>
-            <div className="p-4" style={{ background: settings.backgroundColor, color: settings.textColor }}>
+            <div
+              className="p-4"
+              style={{
+                background: settings.backgroundColor,
+                color: settings.textColor,
+                fontFamily: fontPreviewStack[settings.fontFamily] || fontPreviewStack.system
+              }}
+            >
               <strong>Preview Card</strong>
               <p className="mt-1 text-sm opacity-75">This is how your selected colors feel in the app.</p>
             </div>
