@@ -31,3 +31,28 @@ export function DetailSkeleton() {
     </div>
   );
 }
+
+export function DashboardSkeleton() {
+  return (
+    <div className="dashboard-shell" aria-label="Loading dashboard">
+      <section className="page-header">
+        <div className="skeleton-copy wide" />
+        <div className="skeleton-icon" />
+      </section>
+      <section className="grid gap-4 md:grid-cols-4">
+        <div className="skeleton-card" />
+        <div className="skeleton-card" />
+        <div className="skeleton-card" />
+        <div className="skeleton-card" />
+      </section>
+      <section className="grid gap-5 lg:grid-cols-2">
+        <div className="page-panel">
+          <div className="skeleton-grid" />
+        </div>
+        <div className="page-panel">
+          <div className="skeleton-grid" />
+        </div>
+      </section>
+    </div>
+  );
+}

@@ -2,12 +2,13 @@ import { useQuery } from '@tanstack/react-query';
 import { FileText, HardDrive, Star, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { dashboardApi } from '../api';
+import { DashboardSkeleton } from '../components/LoadingSkeleton';
 
 const formatBytes = (bytes = 0) => bytes < 1024 ? `${bytes} B` : bytes < 1048576 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / 1048576).toFixed(1)} MB`;
 
 export function Dashboard() {
   const { data, isLoading } = useQuery({ queryKey: ['dashboard'], queryFn: dashboardApi.summary });
-  if (isLoading) return <div className="page-panel">Loading dashboard...</div>;
+  if (isLoading) return <DashboardSkeleton />;
   const summary = data!;
   return (
     <div className="dashboard-shell">
