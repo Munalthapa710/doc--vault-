@@ -19,9 +19,7 @@ const fontOptions = [
   { value: 'dm-sans', label: 'DM Sans' },
   { value: 'karla', label: 'Karla' },
   { value: 'overpass', label: 'Overpass' },
-  { value: 'fira-sans-condensed', label: 'Fira Sans Condensed' },
-  { value: 'serif', label: 'Serif' },
-  { value: 'mono', label: 'Mono' }
+  { value: 'fira-sans-condensed', label: 'Fira Sans Condensed' }
 ];
 
 const fontPreviewStack: Record<string, string> = {
@@ -32,9 +30,7 @@ const fontPreviewStack: Record<string, string> = {
   'dm-sans': '"DM Sans", "Segoe UI", Arial, sans-serif',
   karla: '"Karla", "Segoe UI", Arial, sans-serif',
   overpass: '"Overpass", "Segoe UI", Arial, sans-serif',
-  'fira-sans-condensed': '"Fira Sans Condensed", "Arial Narrow", Arial, sans-serif',
-  serif: 'Georgia, "Times New Roman", serif',
-  mono: '"SFMono-Regular", Consolas, "Liberation Mono", monospace'
+  'fira-sans-condensed': '"Fira Sans Condensed", "Arial Narrow", Arial, sans-serif'
 };
 
 export function AppearanceSettings() {

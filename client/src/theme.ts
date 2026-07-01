@@ -26,9 +26,7 @@ const allowedFonts = new Set([
   'karla',
   'overpass',
   'fira-sans-condensed',
-  'inter',
-  'serif',
-  'mono'
+  'inter'
 ]);
 
 export const loadAppearance = (): AppearanceSettings => {
@@ -80,7 +78,5 @@ const resolveFontFamily = (font: string) => {
   if (font === 'overpass') return '"Overpass", "Segoe UI", Arial, sans-serif';
   if (font === 'fira-sans-condensed') return '"Fira Sans Condensed", "Arial Narrow", Arial, sans-serif';
   if (font === 'inter') return '"Inter", "Segoe UI", Arial, sans-serif';
-  if (font === 'serif') return 'Georgia, "Times New Roman", serif';
-  if (font === 'mono') return '"SFMono-Regular", Consolas, "Liberation Mono", monospace';
   return '"SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, ui-sans-serif, system-ui, sans-serif';
 };
