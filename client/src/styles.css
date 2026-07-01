@@ -789,6 +789,26 @@ textarea {
   font-weight: 950;
 }
 
+.document-preview-header {
+  min-width: 0;
+}
+
+.document-preview-header h1,
+.document-preview-header p {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.document-preview-panel {
+  width: 100%;
+}
+
+.document-preview-image {
+  display: block;
+  width: auto;
+  height: auto;
+}
+
 .table-actions {
   display: flex;
   flex-wrap: nowrap;
@@ -1969,6 +1989,44 @@ textarea {
   .mobile-tool-card strong {
     font-size: 0.9rem;
     font-weight: 900;
+  }
+
+  .document-preview-page {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .document-preview-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .document-preview-header h1 {
+    font-size: 1.16rem;
+  }
+
+  .document-preview-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .document-preview-actions .btn-secondary {
+    min-width: 0;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .document-preview-panel {
+    min-height: auto;
+    padding: 12px;
+  }
+
+  .document-preview-image {
+    width: 100%;
+    max-height: none;
+    border-radius: 18px;
   }
 
   .pwa-install-prompt {

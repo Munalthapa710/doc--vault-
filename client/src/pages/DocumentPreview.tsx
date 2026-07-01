@@ -31,15 +31,19 @@ export function DocumentPreview() {
   const isPdf = doc.fileExtension === 'pdf';
   const canRenderPreview = (isImage || isPdf) && previewUrl;
   return (
-    <div className="grid gap-5">
-      <section className="page-header">
-        <div><span className="eyebrow">{doc.fileExtension.toUpperCase()}</span><h1>{doc.displayName}</h1><p>{doc.originalFileName}</p></div>
-        <div className="flex gap-2"><button className="btn-secondary" onClick={download}><Download size={17} />Download</button><Link className="btn-secondary" to="/documents">Back</Link></div>
+    <div className="document-preview-page grid min-w-0 gap-5 overflow-hidden">
+      <section className="page-header document-preview-header">
+        <div className="min-w-0">
+          <span className="eyebrow">{doc.fileExtension.toUpperCase()}</span>
+          <h1>{doc.displayName}</h1>
+          <p>{doc.originalFileName}</p>
+        </div>
+        <div className="document-preview-actions flex gap-2"><button className="btn-secondary" onClick={download}><Download size={17} />Download</button><Link className="btn-secondary" to="/documents">Back</Link></div>
       </section>
-      <section className="page-panel min-h-[520px]">
+      <section className="page-panel document-preview-panel min-h-[520px] min-w-0 overflow-hidden">
         {isPreviewLoading && <div className="grid min-h-96 place-items-center text-sm font-bold text-slate-500">Loading preview...</div>}
         {isPreviewError && <PreviewFallback title="Preview failed" message="Download this file to view it locally." />}
-        {!isPreviewLoading && !isPreviewError && isImage && canRenderPreview && <img className="mx-auto max-h-[720px] max-w-full rounded-xl object-contain" src={previewUrl} alt={doc.displayName} />}
+        {!isPreviewLoading && !isPreviewError && isImage && canRenderPreview && <img className="document-preview-image mx-auto max-h-[720px] max-w-full rounded-xl object-contain" src={previewUrl} alt={doc.displayName} />}
         {!isPreviewLoading && !isPreviewError && isPdf && canRenderPreview && <iframe className="h-[720px] w-full rounded-xl border border-slate-200" src={previewUrl} title={doc.displayName} />}
         {!isPreviewLoading && !isPreviewError && !canRenderPreview && <PreviewFallback title="Preview unavailable" message="Download this file to view it locally." />}
       </section>
