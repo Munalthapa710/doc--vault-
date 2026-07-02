@@ -1,7 +1,7 @@
 import { FormEvent, type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { type ColumnDef } from '@tanstack/react-table';
-import { Download, Eye, File, Heart, Pencil, Plus, RotateCcw, Search, Trash2, X } from 'lucide-react';
+import { Check, ChevronDown, Download, Eye, File, Heart, Pencil, Plus, RotateCcw, Search, Trash2, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { api, documentApi, DocumentItem } from '../api';
@@ -24,6 +24,10 @@ export function DocumentVault() {
   const [customCategories, setCustomCategories] = useState<string[]>([]);
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [newCategory, setNewCategory] = useState('');
+  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
+  const [editingCategoryName, setEditingCategoryName] = useState('');
+  const [categoryDraft, setCategoryDraft] = useState('');
+  const [categoryActionLoading, setCategoryActionLoading] = useState('');
   const queryFilters = { ...filters, includeDeleted: isDeletedView };
   const { data, isLoading } = useQuery({ queryKey: ['documents', queryFilters], queryFn: () => documentApi.list(queryFilters) });
   const categoryFor = (doc: DocumentItem) => doc.tags[0] || 'Uncategorized';
@@ -56,6 +60,9 @@ export function DocumentVault() {
     setEditCategory(editTarget?.tags[0] || '');
     setIsCreatingCategory(false);
     setNewCategory('');
+    setIsCategoryMenuOpen(false);
+    setEditingCategoryName('');
+    setCategoryDraft('');
   }, [editTarget]);
 
   const mutate = async (action: () => Promise<unknown>, message: string) => {
@@ -92,6 +99,46 @@ export function DocumentVault() {
     setEditCategory(category);
     setNewCategory('');
     setIsCreatingCategory(false);
+  };
+
+  const documentsInCategory = (category: string) => (data?.rows || []).filter((doc) => doc.tags[0] === category);
+
+  const renameCategory = async (oldCategory: string) => {
+    const nextCategory = categoryDraft.trim();
+    if (!nextCategory || nextCategory.toLowerCase() === oldCategory.toLowerCase()) {
+      setEditingCategoryName('');
+      setCategoryDraft('');
+      return;
+    }
+    setCategoryActionLoading(oldCategory);
+    try {
+      await Promise.all(documentsInCategory(oldCategory).map((doc) => documentApi.update(doc.id, { displayName: doc.displayName, tags: [nextCategory] })));
+      setCustomCategories((current) => current.map((category) => category === oldCategory ? nextCategory : category));
+      if (editCategory === oldCategory) setEditCategory(nextCategory);
+      if (categoryFilter === oldCategory) setCategoryFilter(nextCategory);
+      toast.success('Category updated');
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+    } finally {
+      setCategoryActionLoading('');
+      setEditingCategoryName('');
+      setCategoryDraft('');
+    }
+  };
+
+  const deleteCategory = async (category: string) => {
+    setCategoryActionLoading(category);
+    try {
+      await Promise.all(documentsInCategory(category).map((doc) => documentApi.update(doc.id, { displayName: doc.displayName, tags: [] })));
+      setCustomCategories((current) => current.filter((item) => item !== category));
+      if (editCategory === category) setEditCategory('');
+      if (categoryFilter === category) setCategoryFilter('all');
+      toast.success('Category deleted');
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+    } finally {
+      setCategoryActionLoading('');
+      setEditingCategoryName('');
+      setCategoryDraft('');
+    }
   };
 
   const actionsFor = (doc: DocumentItem) => (
@@ -186,10 +233,49 @@ export function DocumentVault() {
             </label>
             <label className="grid gap-2 text-sm font-bold">
               Category
-              <select className="form-field" value={editCategory} onChange={(e) => setEditCategory(e.target.value)}>
-                <option value="">Uncategorized</option>
-                {categoryOptions.map((category) => <option key={category} value={category}>{category}</option>)}
-              </select>
+              <div className="relative">
+                <button className="form-field flex items-center justify-between gap-3 text-left font-semibold" type="button" onClick={() => setIsCategoryMenuOpen((open) => !open)}>
+                  <span className="min-w-0 truncate">{editCategory || 'Uncategorized'}</span>
+                  <ChevronDown size={16} />
+                </button>
+                {isCategoryMenuOpen && (
+                  <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-20 grid max-h-72 gap-1 overflow-y-auto rounded-lg border border-slate-200 bg-white p-2 shadow-xl">
+                    <button className="flex min-h-10 items-center rounded-md px-3 text-left text-sm font-bold hover:bg-slate-50" type="button" onClick={() => { setEditCategory(''); setIsCategoryMenuOpen(false); }}>
+                      Uncategorized
+                    </button>
+                    {categoryOptions.map((category) => (
+                      <div key={category} className="flex min-h-10 items-center gap-2 rounded-md px-2 hover:bg-slate-50">
+                        {editingCategoryName === category ? (
+                          <>
+                            <input
+                              className="form-field min-h-9 flex-1 px-2 py-1"
+                              value={categoryDraft}
+                              onChange={(e) => setCategoryDraft(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  renameCategory(category);
+                                }
+                              }}
+                              autoFocus
+                            />
+                            <button className="icon-button h-8 w-8" type="button" disabled={categoryActionLoading === category} onClick={() => renameCategory(category)} title="Save category"><Check size={14} /></button>
+                            <button className="icon-button h-8 w-8" type="button" onClick={() => { setEditingCategoryName(''); setCategoryDraft(''); }} title="Cancel"><X size={14} /></button>
+                          </>
+                        ) : (
+                          <>
+                            <button className="min-w-0 flex-1 truncate text-left text-sm font-bold" type="button" onClick={() => { setEditCategory(category); setIsCategoryMenuOpen(false); }}>
+                              {category}
+                            </button>
+                            <button className="icon-button h-8 w-8" type="button" disabled={!!categoryActionLoading} onClick={() => { setEditingCategoryName(category); setCategoryDraft(category); }} title="Edit category"><Pencil size={14} /></button>
+                            <button className="icon-button h-8 w-8 text-rose-700" type="button" disabled={!!categoryActionLoading} onClick={() => deleteCategory(category)} title="Delete category"><Trash2 size={14} /></button>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </label>
             {isCreatingCategory ? (
               <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
