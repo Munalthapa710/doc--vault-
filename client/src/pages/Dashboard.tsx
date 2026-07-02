@@ -7,9 +7,22 @@ import { DashboardSkeleton } from '../components/LoadingSkeleton';
 const formatBytes = (bytes = 0) => bytes < 1024 ? `${bytes} B` : bytes < 1048576 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / 1048576).toFixed(1)} MB`;
 
 export function Dashboard() {
-  const { data, isLoading } = useQuery({ queryKey: ['dashboard'], queryFn: dashboardApi.summary });
+  const { data, isLoading, isError } = useQuery({ queryKey: ['dashboard'], queryFn: dashboardApi.summary });
   if (isLoading) return <DashboardSkeleton />;
-  const summary = data!;
+  if (isError || !data) {
+    return (
+      <div className="dashboard-shell">
+        <section className="page-header">
+          <div><span className="eyebrow">Secure storage</span><h1>Document Dashboard</h1><p>Unable to load dashboard data right now.</p></div>
+          <Link className="btn-primary" to="/documents/upload">Upload Document</Link>
+        </section>
+        <section className="page-panel">
+          <p className="text-sm font-bold text-slate-500">Please refresh the page or sign in again.</p>
+        </section>
+      </div>
+    );
+  }
+  const summary = data;
   return (
     <div className="dashboard-shell">
       <section className="page-header">

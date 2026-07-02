@@ -30,7 +30,10 @@ builder.Services.AddHttpClient();
 builder.Services.AddSingleton<ApplicationDbContext>();
 builder.Services.AddPersonalVaultApiServices();
 
-var allowedOrigins = configuration.GetSection("Security:AllowedCorsOrigins").Get<string[]>() ?? [];
+var configuredOrigins = configuration.GetSection("Security:AllowedCorsOrigins").Get<string[]>() ?? [];
+var environmentOrigins = (configuration["Security:AllowedCorsOriginsCsv"] ?? string.Empty)
+    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+var allowedOrigins = configuredOrigins.Concat(environmentOrigins).Where(origin => !string.IsNullOrWhiteSpace(origin)).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("ConfiguredCors", policy => policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod().AllowCredentials());
