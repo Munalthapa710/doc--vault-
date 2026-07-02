@@ -12,6 +12,8 @@ export function Settings() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [secretWord, setSecretWord] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [showSecretWord, setShowSecretWord] = useState(false);
   const mustSetPassword = !!user?.mustChangePassword;
   useEffect(() => { setFullName(user?.fullName || ''); setEmailOtpLoginEnabled(user?.emailOtpLoginEnabled ?? true); }, [user]);
@@ -28,6 +30,8 @@ export function Settings() {
       await refreshMe();
       setCurrentPassword('');
       setNewPassword('');
+      setShowCurrentPassword(false);
+      setShowNewPassword(false);
       toast.success(user?.hasLocalPassword ? 'Password changed' : 'Local password created');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Unable to update password');
@@ -66,8 +70,20 @@ export function Settings() {
           <h2 className="panel-title">{user?.hasLocalPassword ? 'Change Password' : 'Set Password'}</h2>
           <div className="grid gap-2">
             <p className="mb-2 text-sm font-bold text-slate-500">Use at least 8 characters with uppercase, lowercase, number, and special character.</p>
-            {user?.hasLocalPassword && <input className="form-field" type="password" placeholder="Current password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required />}
-            <input className="form-field" type="password" placeholder="New strong password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
+            {user?.hasLocalPassword && (
+              <div className="password-field">
+                <input className="form-field pr-12" type={showCurrentPassword ? 'text' : 'password'} placeholder="Current password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required />
+                <button className="password-toggle" type="button" onClick={() => setShowCurrentPassword((value) => !value)} aria-label={showCurrentPassword ? 'Hide current password' : 'Show current password'}>
+                  {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            )}
+            <div className="password-field">
+              <input className="form-field pr-12" type={showNewPassword ? 'text' : 'password'} placeholder="New strong password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
+              <button className="password-toggle" type="button" onClick={() => setShowNewPassword((value) => !value)} aria-label={showNewPassword ? 'Hide new password' : 'Show new password'}>
+                {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
             <button className="btn-primary">Save Password</button>
           </div>
         </form>

@@ -11,6 +11,7 @@ export function Login({ mode = 'password' }: { mode?: 'password' | 'otp' }) {
   const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
   const [secretWord, setSecretWord] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [showSecretWord, setShowSecretWord] = useState(false);
   const [loginMethod, setLoginMethod] = useState<'otp' | 'secret'>('otp');
   const [loading, setLoading] = useState(false);
@@ -74,7 +75,12 @@ export function Login({ mode = 'password' }: { mode?: 'password' | 'otp' }) {
                 <button className={loginMethod === 'otp' ? 'btn-primary min-h-9' : 'btn-secondary min-h-9'} type="button" onClick={() => setLoginMethod('otp')}>OTP</button>
                 <button className={loginMethod === 'secret' ? 'btn-primary min-h-9' : 'btn-secondary min-h-9'} type="button" onClick={() => setLoginMethod('secret')}>Secret word</button>
               </div>
-              <input className="form-field" type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <div className="password-field">
+                <input className="form-field pr-12" type={showPassword ? 'text' : 'password'} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                <button className="password-toggle" type="button" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? 'Hide password' : 'Show password'}>
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               {loginMethod === 'secret' && (
                 <div className="password-field">
                   <input className="form-field pr-12" type={showSecretWord ? 'text' : 'password'} placeholder="Secret word" value={secretWord} onChange={(e) => setSecretWord(e.target.value)} minLength={4} required />
