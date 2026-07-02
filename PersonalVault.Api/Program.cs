@@ -33,7 +33,13 @@ builder.Services.AddPersonalVaultApiServices();
 var configuredOrigins = configuration.GetSection("Security:AllowedCorsOrigins").Get<string[]>() ?? [];
 var environmentOrigins = (configuration["Security:AllowedCorsOriginsCsv"] ?? string.Empty)
     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-var allowedOrigins = configuredOrigins.Concat(environmentOrigins).Where(origin => !string.IsNullOrWhiteSpace(origin)).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+var defaultOrigins = new[] { "http://localhost:5173", "https://docvault.munalthapa710.com.np" };
+var allowedOrigins = configuredOrigins
+    .Concat(environmentOrigins)
+    .Concat(defaultOrigins)
+    .Where(origin => !string.IsNullOrWhiteSpace(origin))
+    .Distinct(StringComparer.OrdinalIgnoreCase)
+    .ToArray();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("ConfiguredCors", policy => policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod().AllowCredentials());
