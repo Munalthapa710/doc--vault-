@@ -1,14 +1,15 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { TableSkeleton } from './components/LoadingSkeleton';
+import { loadDashboard, loadDocumentPreview, loadDocumentUpload, loadDocumentVault, loadSettings, preloadAuthenticatedRoutes } from './routePreloads';
 import { useAppStore } from './store';
 
-const Dashboard = lazy(() => import('./pages/Dashboard').then((module) => ({ default: module.Dashboard })));
-const DocumentVault = lazy(() => import('./pages/DocumentVault').then((module) => ({ default: module.DocumentVault })));
-const DocumentUpload = lazy(() => import('./pages/DocumentUpload').then((module) => ({ default: module.DocumentUpload })));
-const DocumentPreview = lazy(() => import('./pages/DocumentPreview').then((module) => ({ default: module.DocumentPreview })));
-const Settings = lazy(() => import('./pages/Settings').then((module) => ({ default: module.Settings })));
+const Dashboard = lazy(() => loadDashboard().then((module) => ({ default: module.Dashboard })));
+const DocumentVault = lazy(() => loadDocumentVault().then((module) => ({ default: module.DocumentVault })));
+const DocumentUpload = lazy(() => loadDocumentUpload().then((module) => ({ default: module.DocumentUpload })));
+const DocumentPreview = lazy(() => loadDocumentPreview().then((module) => ({ default: module.DocumentPreview })));
+const Settings = lazy(() => loadSettings().then((module) => ({ default: module.Settings })));
 
 function RouteFallback() {
   return (
@@ -21,6 +22,10 @@ function RouteFallback() {
 export function AuthenticatedRoutes() {
   const user = useAppStore((state) => state.user);
   const mustSetPassword = user?.mustChangePassword;
+
+  useEffect(() => {
+    preloadAuthenticatedRoutes();
+  }, []);
 
   return (
     <Suspense fallback={<RouteFallback />}>

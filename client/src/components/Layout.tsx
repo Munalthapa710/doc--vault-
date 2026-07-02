@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, LogOut, Menu, X } from 'lucide-react';
 import clsx from 'clsx';
 import { navGroups } from '../navigation';
+import { preloadRouteForPath } from '../routePreloads';
 import { useAppStore } from '../store';
 import { ConfirmDialog } from './ConfirmDialog';
 
@@ -54,7 +55,7 @@ export function Layout() {
                 {group.items.map((item) => {
                   const Icon = item.icon;
                   return (
-                    <NavLink key={item.path} to={item.path} end className={({ isActive }) => clsx('sidebar-link group', isActive && 'active', sidebarCollapsed && 'justify-center')} title={item.title}>
+                    <NavLink key={item.path} to={item.path} end className={({ isActive }) => clsx('sidebar-link group', isActive && 'active', sidebarCollapsed && 'justify-center')} title={item.title} onFocus={() => preloadRouteForPath(item.path)} onMouseEnter={() => preloadRouteForPath(item.path)}>
                       <span className="sidebar-link-icon"><Icon size={18} /></span>
                       {!sidebarCollapsed && <span className="truncate">{item.title}</span>}
                     </NavLink>
@@ -91,7 +92,7 @@ export function Layout() {
         {bottomItems.map((item) => {
           const Icon = item.icon;
           return (
-            <NavLink key={item.path} to={item.path} end className={({ isActive }) => clsx('mobile-bottom-link', isActive && 'active')}>
+            <NavLink key={item.path} to={item.path} end className={({ isActive }) => clsx('mobile-bottom-link', isActive && 'active')} onFocus={() => preloadRouteForPath(item.path)} onMouseEnter={() => preloadRouteForPath(item.path)}>
               <Icon size={19} />
               <span>{bottomLabels[item.path] || item.title}</span>
             </NavLink>
@@ -117,7 +118,7 @@ export function Layout() {
                   <div className="mobile-menu-items">
                     {group.items.map((item) => {
                       const Icon = item.icon;
-                      return <NavLink key={item.path} to={item.path} end className={({ isActive }) => clsx('mobile-menu-link', isActive && 'active')} onClick={closeMobileMenu}><Icon size={18} /><span>{item.title}</span></NavLink>;
+                      return <NavLink key={item.path} to={item.path} end className={({ isActive }) => clsx('mobile-menu-link', isActive && 'active')} onClick={closeMobileMenu} onFocus={() => preloadRouteForPath(item.path)} onMouseEnter={() => preloadRouteForPath(item.path)}><Icon size={18} /><span>{item.title}</span></NavLink>;
                     })}
                   </div>
                 </section>
