@@ -19,6 +19,9 @@ public class DocumentFile
     public string CloudinarySecureUrl { get; set; } = string.Empty;
     public string CloudinaryResourceType { get; set; } = "raw";
     public string Folder { get; set; } = string.Empty;
+    public bool IsEncrypted { get; set; }
+    public string EncryptionNonce { get; set; } = string.Empty;
+    public string EncryptionTag { get; set; } = string.Empty;
     public List<string> Tags { get; set; } = [];
     public bool IsFavorite { get; set; }
     public bool IsDeleted { get; set; }

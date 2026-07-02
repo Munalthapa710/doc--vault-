@@ -2,7 +2,7 @@ namespace PersonalVault.Api.Service.Cloudinary;
 
 public interface ICloudinaryService
 {
-    Task<CloudinaryUploadResult> UploadAsync(IFormFile file, string userId, string safeFileName, CancellationToken cancellationToken);
+    Task<CloudinaryUploadResult> UploadRawAsync(Stream stream, string userId, string safeFileName, CancellationToken cancellationToken);
     Task<Stream> DownloadAsync(string publicId, string resourceType, string secureUrl, CancellationToken cancellationToken);
     Task DeleteAsync(string publicId, string resourceType, CancellationToken cancellationToken);
     string CreateSignedUrl(string publicId, string resourceType);

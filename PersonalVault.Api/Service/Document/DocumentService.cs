@@ -11,18 +11,22 @@ using PersonalVault.Api.Model.Security;
 using PersonalVault.Api.Data;
 using PersonalVault.Api.Service.AuditLog;
 using PersonalVault.Api.Service.Cloudinary;
+using PersonalVault.Api.Service.Encryption;
 
 namespace PersonalVault.Api.Service.Document;
 
-public class DocumentService(ApplicationDbContext context, ICloudinaryService cloudinaryService, IAuditLogService auditLogService, IOptions<SecuritySettings> options, IOptions<CloudinarySettings> cloudinaryOptions) : IDocumentService
+public class DocumentService(ApplicationDbContext context, ICloudinaryService cloudinaryService, IFileEncryptionService fileEncryptionService, IAuditLogService auditLogService, IOptions<SecuritySettings> options, IOptions<CloudinarySettings> cloudinaryOptions) : IDocumentService
 {
     public async Task<DocumentResponse> UploadAsync(string userId, IFormFile file, HttpContext httpContext, CancellationToken cancellationToken)
     {
         if (file.Length <= 0 || file.Length > options.Value.MaxFileSizeBytes) throw new InvalidOperationException("Invalid file size.");
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (!FileHelpers.IsAllowed(extension, file.ContentType)) throw new InvalidOperationException("File type is not allowed.");
-        var safeFileName = $"{Guid.NewGuid():N}{extension}";
-        var uploaded = await cloudinaryService.UploadAsync(file, userId, safeFileName, cancellationToken);
+        var safeFileName = $"{Guid.NewGuid():N}.enc";
+        await using var sourceStream = file.OpenReadStream();
+        var encrypted = await fileEncryptionService.EncryptAsync(sourceStream, cancellationToken);
+        await using var encryptedStream = encrypted.Stream;
+        var uploaded = await cloudinaryService.UploadRawAsync(encryptedStream, userId, safeFileName, cancellationToken);
         var document = new DocumentFile
         {
             UserId = userId,
@@ -31,11 +35,14 @@ public class DocumentService(ApplicationDbContext context, ICloudinaryService cl
             DisplayName = FileHelpers.SanitizeDisplayName(file.FileName),
             FileExtension = extension.TrimStart('.'),
             MimeType = file.ContentType,
-            FileSize = uploaded.Bytes,
+            FileSize = file.Length,
             CloudinaryPublicId = uploaded.PublicId,
             CloudinarySecureUrl = uploaded.SecureUrl,
             CloudinaryResourceType = uploaded.ResourceType,
-            Folder = $"{cloudinaryOptions.Value.Folder.Trim('/')}/{userId}/documents"
+            Folder = $"{cloudinaryOptions.Value.Folder.Trim('/')}/{userId}/documents",
+            IsEncrypted = true,
+            EncryptionNonce = encrypted.Nonce,
+            EncryptionTag = encrypted.Tag
         };
         await context.Documents.InsertOneAsync(document, cancellationToken: cancellationToken);
         await auditLogService.LogAsync(userId, "Document uploaded", httpContext, new Dictionary<string, string> { ["documentId"] = document.Id! });
@@ -79,6 +86,10 @@ public class DocumentService(ApplicationDbContext context, ICloudinaryService cl
     {
         var doc = await RequireDocument(userId, id, false);
         var stream = await cloudinaryService.DownloadAsync(doc.CloudinaryPublicId, doc.CloudinaryResourceType, doc.CloudinarySecureUrl, cancellationToken);
+        if (doc.IsEncrypted)
+        {
+            stream = await fileEncryptionService.DecryptAsync(stream, doc.EncryptionNonce, doc.EncryptionTag, cancellationToken);
+        }
         await context.Documents.UpdateOneAsync(x => x.Id == id, Builders<DocumentFile>.Update.Set(x => x.LastDownloadedAt, DateTime.UtcNow), cancellationToken: cancellationToken);
         await auditLogService.LogAsync(userId, "Document downloaded", httpContext, new Dictionary<string, string> { ["documentId"] = id });
         return (stream, doc.MimeType, $"{doc.DisplayName}.{doc.FileExtension}");

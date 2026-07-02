@@ -40,6 +40,7 @@ public class SecuritySettings
 {
     public string[] AllowedCorsOrigins { get; set; } = [];
     public long MaxFileSizeBytes { get; set; } = 26214400;
+    public string FileEncryptionKey { get; set; } = string.Empty;
     public int ResendOtpCooldownSeconds { get; set; } = 60;
     public int OtpExpiryMinutes { get; set; } = 5;
     public int MaxOtpAttempts { get; set; } = 5;

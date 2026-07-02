@@ -8,46 +8,28 @@ namespace PersonalVault.Api.Service.Cloudinary;
 
 public class CloudinaryService(IHttpClientFactory httpClientFactory, IOptions<CloudinarySettings> options) : ICloudinaryService
 {
-    public async Task<CloudinaryUploadResult> UploadAsync(IFormFile file, string userId, string safeFileName, CancellationToken cancellationToken)
+    public async Task<CloudinaryUploadResult> UploadRawAsync(Stream stream, string userId, string safeFileName, CancellationToken cancellationToken)
     {
         var settings = options.Value;
         if (string.IsNullOrWhiteSpace(settings.CloudName) || string.IsNullOrWhiteSpace(settings.ApiKey) || string.IsNullOrWhiteSpace(settings.ApiSecret))
         {
             throw new InvalidOperationException("Cloudinary configuration is required for uploads.");
         }
-        var resourceType = file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) ? "image" : "raw";
+
         var folder = $"{settings.Folder.Trim('/')}/{userId}/documents";
         var publicId = Path.GetFileNameWithoutExtension(safeFileName);
-
         var cloudinary = CreateCloudinary(settings);
-        await using var stream = file.OpenReadStream();
-        var fileDescription = new FileDescription(safeFileName, stream);
-        RawUploadResult result;
 
-        if (resourceType == "image")
+        if (stream.CanSeek) stream.Position = 0;
+        var result = await cloudinary.UploadAsync(new RawUploadParams
         {
-            result = await cloudinary.UploadAsync(new ImageUploadParams
-            {
-                File = fileDescription,
-                Folder = folder,
-                PublicId = publicId,
-                UseFilename = false,
-                UniqueFilename = false,
-                Overwrite = false
-            }, cancellationToken);
-        }
-        else
-        {
-            result = await cloudinary.UploadAsync(new RawUploadParams
-            {
-                File = fileDescription,
-                Folder = folder,
-                PublicId = publicId,
-                UseFilename = false,
-                UniqueFilename = false,
-                Overwrite = false
-            }, "raw", cancellationToken);
-        }
+            File = new FileDescription(safeFileName, stream),
+            Folder = folder,
+            PublicId = publicId,
+            UseFilename = false,
+            UniqueFilename = false,
+            Overwrite = false
+        }, "raw", cancellationToken);
 
         if (result.Error is not null)
         {
@@ -58,7 +40,7 @@ public class CloudinaryService(IHttpClientFactory httpClientFactory, IOptions<Cl
         {
             PublicId = result.PublicId,
             SecureUrl = result.SecureUrl?.ToString() ?? string.Empty,
-            ResourceType = resourceType,
+            ResourceType = "raw",
             Format = result.Format,
             Bytes = result.Bytes,
             Version = long.TryParse(result.Version, out var version) ? version : 0,
