@@ -35,8 +35,14 @@ public class TokenService(ApplicationDbContext context, IOptions<JwtSettings> op
     public async Task<TokenResponse?> RefreshAsync(string refreshToken, HttpContext httpContext)
     {
         var hash = SecurityHelpers.Sha256(refreshToken);
-        var stored = await context.RefreshTokens.Find(x => x.TokenHash == hash && x.RevokedAt == null && x.ExpiresAt > DateTime.UtcNow).FirstOrDefaultAsync();
+        var stored = await context.RefreshTokens.Find(x => x.TokenHash == hash).FirstOrDefaultAsync();
         if (stored is null) return null;
+        if (stored.RevokedAt is not null)
+        {
+            await RevokeAllAsync(stored.UserId, httpContext);
+            return null;
+        }
+        if (stored.ExpiresAt <= DateTime.UtcNow) return null;
         var user = await context.Users.Find(x => x.Id == stored.UserId && !x.IsDeleted && x.IsActive).FirstOrDefaultAsync();
         if (user is null) return null;
         var next = SecurityHelpers.GenerateSecureToken();

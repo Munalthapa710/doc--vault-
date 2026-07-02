@@ -21,7 +21,7 @@ public class DocumentService(ApplicationDbContext context, ICloudinaryService cl
     {
         if (file.Length <= 0 || file.Length > options.Value.MaxFileSizeBytes) throw new InvalidOperationException("Invalid file size.");
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-        if (!FileHelpers.IsAllowed(extension, file.ContentType)) throw new InvalidOperationException("File type is not allowed.");
+        if (!await FileHelpers.IsAllowedFileAsync(file, extension, cancellationToken)) throw new InvalidOperationException("File type is not allowed.");
         var safeFileName = $"{Guid.NewGuid():N}.enc";
         await using var sourceStream = file.OpenReadStream();
         var encrypted = await fileEncryptionService.EncryptAsync(sourceStream, cancellationToken);

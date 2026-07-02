@@ -8,11 +8,10 @@ const resolveApiBaseUrl = () => {
 
 export const storageKeys = {
   accessToken: 'personalVault.accessToken',
-  refreshToken: 'personalVault.refreshToken',
   user: 'personalVault.user'
 };
 
-export const api = axios.create({ baseURL: resolveApiBaseUrl() });
+export const api = axios.create({ baseURL: resolveApiBaseUrl(), withCredentials: true });
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem(storageKeys.accessToken);
@@ -24,14 +23,12 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const original = error.config;
-    const refreshToken = localStorage.getItem(storageKeys.refreshToken);
-    if (error.response?.status === 401 && refreshToken && !original?._retry && original.url !== '/auth/refresh-token') {
+    if (error.response?.status === 401 && !original?._retry && original.url !== '/auth/refresh-token') {
       original._retry = true;
       try {
-        const response = await api.post('/auth/refresh-token', { refreshToken });
+        const response = await api.post('/auth/refresh-token');
         const data = response.data.data;
         localStorage.setItem(storageKeys.accessToken, data.accessToken);
-        localStorage.setItem(storageKeys.refreshToken, data.refreshToken);
         localStorage.setItem(storageKeys.user, JSON.stringify(data.user));
         original.headers = original.headers || {};
         original.headers.Authorization = `Bearer ${data.accessToken}`;
@@ -39,7 +36,6 @@ api.interceptors.response.use(
       } catch (refreshError) {
         if (axios.isAxiosError(refreshError) && [400, 401, 403].includes(refreshError.response?.status || 0)) {
           localStorage.removeItem(storageKeys.accessToken);
-          localStorage.removeItem(storageKeys.refreshToken);
           localStorage.removeItem(storageKeys.user);
           if (!window.location.pathname.startsWith('/login')) window.location.assign('/login');
         }
@@ -102,11 +98,11 @@ export const authApi = {
   register: (payload: { fullName: string; email: string; password: string }) => api.post('/auth/register', payload),
   verifyEmailOtp: (email: string, otp: string) => api.post('/auth/verify-email-otp', { email, otp, purpose: 'EmailVerification' }),
   login: (email: string, password: string) => api.post('/auth/login', { email, password }),
-  loginWithSecretWord: async (email: string, password: string, secretWord: string) => unwrap<{ accessToken: string; refreshToken: string; user: User }>(await api.post('/auth/login-secret-word', { email, password, secretWord })),
-  verifyLoginOtp: async (email: string, otp: string) => unwrap<{ accessToken: string; refreshToken: string; user: User }>(await api.post('/auth/verify-login-otp', { email, otp, purpose: 'Login' })),
+  loginWithSecretWord: async (email: string, password: string, secretWord: string) => unwrap<{ accessToken: string; user: User }>(await api.post('/auth/login-secret-word', { email, password, secretWord })),
+  verifyLoginOtp: async (email: string, otp: string) => unwrap<{ accessToken: string; user: User }>(await api.post('/auth/verify-login-otp', { email, otp, purpose: 'Login' })),
   forgotPassword: (email: string) => api.post('/auth/forgot-password', { email }),
   resetPassword: (email: string, otp: string, newPassword: string) => api.post('/auth/reset-password', { email, otp, newPassword }),
-  googleLogin: async (idToken: string) => unwrap<{ accessToken: string; refreshToken: string; user: User }>(await api.post('/auth/google-login', { idToken })),
+  googleLogin: async (idToken: string, nonce: string) => unwrap<{ accessToken: string; user: User }>(await api.post('/auth/google-login', { idToken, nonce })),
   changePassword: (currentPassword: string | undefined, newPassword: string) => api.post('/auth/change-password', { currentPassword, newPassword }),
   me: async () => unwrap<User>(await api.get('/auth/me')),
   logoutAll: () => api.post('/auth/logout-all')

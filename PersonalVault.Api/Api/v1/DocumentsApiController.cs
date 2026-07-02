@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using PersonalVault.Api.Common;
 using PersonalVault.Api.ViewModel.Auth;
 using PersonalVault.Api.ViewModel.Document;
@@ -13,6 +14,7 @@ namespace PersonalVault.Api.Api.v1;
 public class DocumentsApiController(IDocumentService documentService) : BaseApiController
 {
     [HttpPost("upload")]
+    [EnableRateLimiting("Upload")]
     [RequestSizeLimit(60_000_000)]
     public async Task<IActionResult> Upload(IFormFile file, CancellationToken cancellationToken) => HttpResponse(200, "Document uploaded successfully.", await documentService.UploadAsync(UserId(), file, HttpContext, cancellationToken));
 

@@ -15,8 +15,11 @@ export function GoogleCallback() {
         const query = new URLSearchParams(window.location.search);
         const idToken = hash.get('id_token') || query.get('id_token') || query.get('credential');
         if (!idToken) throw new Error('Google did not return an ID token.');
-        const response = await authApi.googleLogin(idToken);
-        setSession(response.accessToken, response.refreshToken, response.user);
+        const nonce = sessionStorage.getItem('personalVault.googleNonce') || '';
+        if (!nonce) throw new Error('Google sign in session expired.');
+        const response = await authApi.googleLogin(idToken, nonce);
+        sessionStorage.removeItem('personalVault.googleNonce');
+        setSession(response.accessToken, response.user);
         toast.success('Signed in with Google');
         navigate(response.user.mustChangePassword ? '/settings' : '/', { replace: true });
       } catch (error: any) {

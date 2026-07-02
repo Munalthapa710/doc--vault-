@@ -32,6 +32,20 @@ export function DetailSkeleton() {
   );
 }
 
+export function PreviewSkeleton() {
+  return (
+    <div className="document-preview-page grid min-w-0 gap-5 overflow-hidden" aria-label="Loading preview">
+      <section className="page-header document-preview-header">
+        <div className="skeleton-copy wide" />
+        <div className="skeleton-icon" />
+      </section>
+      <section className="page-panel document-preview-panel min-h-[520px] min-w-0 overflow-hidden">
+        <div className="skeleton-grid" />
+      </section>
+    </div>
+  );
+}
+
 export function DashboardSkeleton() {
   return (
     <div className="dashboard-shell" aria-label="Loading dashboard">

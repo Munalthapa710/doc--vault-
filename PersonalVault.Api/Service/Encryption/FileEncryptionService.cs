@@ -5,7 +5,7 @@ using PersonalVault.Api.Configurations;
 
 namespace PersonalVault.Api.Service.Encryption;
 
-public class FileEncryptionService(IOptions<SecuritySettings> securityOptions, IOptions<JwtSettings> jwtOptions) : IFileEncryptionService
+public class FileEncryptionService(IOptions<SecuritySettings> securityOptions) : IFileEncryptionService
 {
     private const int NonceSize = 12;
     private const int TagSize = 16;
@@ -65,6 +65,6 @@ public class FileEncryptionService(IOptions<SecuritySettings> securityOptions, I
             return SHA256.HashData(Encoding.UTF8.GetBytes(configuredKey));
         }
 
-        return SHA256.HashData(Encoding.UTF8.GetBytes(jwtOptions.Value.Key));
+        throw new InvalidOperationException("Security:FileEncryptionKey must be configured.");
     }
 }

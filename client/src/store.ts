@@ -8,7 +8,7 @@ type AppState = {
   requestLoginOtp: (email: string, password: string) => Promise<void>;
   loginWithSecretWord: (email: string, password: string, secretWord: string) => Promise<void>;
   verifyLoginOtp: (email: string, otp: string) => Promise<void>;
-  setSession: (accessToken: string, refreshToken: string, user: User) => void;
+  setSession: (accessToken: string, user: User) => void;
   refreshMe: () => Promise<void>;
   logout: () => Promise<void>;
   toggleSidebar: () => void;
@@ -21,7 +21,6 @@ const readStoredUser = () => {
     return JSON.parse(rawUser) as User;
   } catch {
     localStorage.removeItem(storageKeys.accessToken);
-    localStorage.removeItem(storageKeys.refreshToken);
     localStorage.removeItem(storageKeys.user);
     return null;
   }
@@ -38,16 +37,15 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   loginWithSecretWord: async (email, password, secretWord) => {
     const response = await authApi.loginWithSecretWord(email, password, secretWord);
-    get().setSession(response.accessToken, response.refreshToken, response.user);
+    get().setSession(response.accessToken, response.user);
   },
   verifyLoginOtp: async (email, otp) => {
     const response = await authApi.verifyLoginOtp(email, otp);
-    get().setSession(response.accessToken, response.refreshToken, response.user);
+    get().setSession(response.accessToken, response.user);
     sessionStorage.removeItem('personalVault.pendingLoginEmail');
   },
-  setSession: (accessToken, refreshToken, user) => {
+  setSession: (accessToken, user) => {
     localStorage.setItem(storageKeys.accessToken, accessToken);
-    localStorage.setItem(storageKeys.refreshToken, refreshToken);
     localStorage.setItem(storageKeys.user, JSON.stringify(user));
     set({ user });
   },
@@ -57,12 +55,10 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ user });
   },
   logout: async () => {
-    const refreshToken = localStorage.getItem(storageKeys.refreshToken);
     try {
-      if (refreshToken) await api.post('/auth/logout', { refreshToken });
+      await api.post('/auth/logout');
     } finally {
       localStorage.removeItem(storageKeys.accessToken);
-      localStorage.removeItem(storageKeys.refreshToken);
       localStorage.removeItem(storageKeys.user);
       set({ user: null });
     }

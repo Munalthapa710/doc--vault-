@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { api, documentApi, DocumentItem } from '../api';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { DataTable } from '../components/DataTable';
+import { TableSkeleton } from '../components/LoadingSkeleton';
 
 const formatBytes = (bytes: number) => bytes < 1048576 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / 1048576).toFixed(1)} MB`;
 
@@ -191,7 +192,7 @@ export function DocumentVault() {
           </select>
         </div>
         <div className="mt-5">
-          {isLoading && <p className="text-sm font-bold text-slate-500">Loading documents...</p>}
+          {isLoading && <TableSkeleton rows={8} />}
           {!isLoading && docs.length === 0 && <DataTable rows={[]} columns={columns} emptyTitle={isDeletedView ? 'No deleted documents found.' : 'No documents match this view.'} />}
           {!isLoading && docs.length > 0 && (
             <div className="grid gap-5">

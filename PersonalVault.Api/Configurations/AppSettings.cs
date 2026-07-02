@@ -12,7 +12,7 @@ public class JwtSettings
     public string Issuer { get; set; } = "PersonalVault";
     public string Audience { get; set; } = "PersonalVaultClient";
     public int AccessTokenMinutes { get; set; } = 15;
-    public int RefreshTokenDays { get; set; } = 180;
+    public int RefreshTokenDays { get; set; } = 30;
 }
 
 public class CloudinarySettings

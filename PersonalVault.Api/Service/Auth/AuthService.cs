@@ -1,7 +1,10 @@
 using System.Text.Json;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using PersonalVault.Api.ViewModel.Auth;
 using PersonalVault.Api.ViewModel.Document;
+using PersonalVault.Api.Configurations;
 using PersonalVault.Api.Helpers;
 using PersonalVault.Api.Model.Auth;
 using PersonalVault.Api.Model.Document;
@@ -13,7 +16,7 @@ using PersonalVault.Api.Service.Token;
 
 namespace PersonalVault.Api.Service.Auth;
 
-public class AuthService(ApplicationDbContext context, IOtpService otpService, ITokenService tokenService, IAuditLogService auditLogService, IHttpClientFactory httpClientFactory) : IAuthService
+public class AuthService(ApplicationDbContext context, IOtpService otpService, ITokenService tokenService, IAuditLogService auditLogService, IHttpClientFactory httpClientFactory, IOptions<GoogleAuthSettings> googleOptions, IOptions<SecuritySettings> securityOptions) : IAuthService
 {
     public async Task RegisterAsync(RegisterRequest request, HttpContext httpContext)
     {
@@ -36,9 +39,11 @@ public class AuthService(ApplicationDbContext context, IOtpService otpService, I
             await auditLogService.LogAsync(user?.Id, "Login failed", httpContext);
             throw new UnauthorizedAccessException("Invalid email or password.");
         }
+        if (!user.IsEmailVerified) throw new UnauthorizedAccessException("Please verify your email before signing in.");
+        if (!user.EmailOtpLoginEnabled) throw new InvalidOperationException("Email OTP login is disabled for this account.");
         await context.Users.UpdateOneAsync(x => x.Id == user.Id, Builders<User>.Update.Set(x => x.FailedLoginCount, 0).Unset(x => x.LockoutEndAt));
         await auditLogService.LogAsync(user.Id, "Login password passed", httpContext);
-        await otpService.SendOtpAsync(user, "Login", httpContext, false);
+        await otpService.SendOtpAsync(user, "Login", httpContext);
     }
 
     public async Task<TokenResponse> LoginWithSecretWordAsync(SecretWordLoginRequest request, HttpContext httpContext)
@@ -50,6 +55,7 @@ public class AuthService(ApplicationDbContext context, IOtpService otpService, I
             await auditLogService.LogAsync(user?.Id, "Login failed", httpContext);
             throw new UnauthorizedAccessException("Invalid email, password, or secret word.");
         }
+        if (!user.IsEmailVerified) throw new UnauthorizedAccessException("Please verify your email before signing in.");
 
         await context.Users.UpdateOneAsync(x => x.Id == user.Id, Builders<User>.Update.Set(x => x.FailedLoginCount, 0).Unset(x => x.LockoutEndAt).Set(x => x.LastLoginAt, DateTime.UtcNow).Set(x => x.UpdatedAt, DateTime.UtcNow));
         user.LastLoginAt = DateTime.UtcNow;
@@ -84,7 +90,7 @@ public class AuthService(ApplicationDbContext context, IOtpService otpService, I
 
     public async Task<TokenResponse> GoogleLoginAsync(GoogleLoginRequest request, HttpContext httpContext)
     {
-        var info = await VerifyGoogleToken(request.IdToken);
+        var info = await VerifyGoogleToken(request.IdToken, request.Nonce);
         var user = await FindByEmail(info.Email);
         if (user is null)
         {
@@ -159,14 +165,36 @@ public class AuthService(ApplicationDbContext context, IOtpService otpService, I
     {
         var count = user.FailedLoginCount + 1;
         var update = Builders<User>.Update.Set(x => x.FailedLoginCount, count);
-        if (count >= 5) update = update.Set(x => x.LockoutEndAt, DateTime.UtcNow.AddMinutes(15));
+        if (count >= securityOptions.Value.MaxLoginAttempts) update = update.Set(x => x.LockoutEndAt, DateTime.UtcNow.AddMinutes(securityOptions.Value.LockoutMinutes));
         await context.Users.UpdateOneAsync(x => x.Id == user.Id, update);
     }
 
     private Task<User?> FindByEmail(string email) => context.Users.Find(x => x.Email == email.Trim().ToLowerInvariant() && !x.IsDeleted).FirstOrDefaultAsync()!;
 
-    private async Task<GoogleInfo> VerifyGoogleToken(string idToken)
+    private async Task<GoogleInfo> VerifyGoogleToken(string idToken, string expectedNonce)
     {
+        var clientId = googleOptions.Value.ClientId;
+        if (string.IsNullOrWhiteSpace(clientId)) throw new InvalidOperationException("Google client id is not configured.");
+
+        var jwt = new JwtSecurityTokenHandler().ReadJwtToken(idToken);
+        if (!jwt.Issuer.Equals("https://accounts.google.com", StringComparison.Ordinal) && !jwt.Issuer.Equals("accounts.google.com", StringComparison.Ordinal))
+        {
+            throw new UnauthorizedAccessException("Invalid Google token issuer.");
+        }
+        if (!jwt.Audiences.Contains(clientId, StringComparer.Ordinal))
+        {
+            throw new UnauthorizedAccessException("Invalid Google token audience.");
+        }
+        if (jwt.ValidTo <= DateTime.UtcNow)
+        {
+            throw new UnauthorizedAccessException("Google token is expired.");
+        }
+        var nonce = jwt.Claims.FirstOrDefault(x => x.Type == "nonce")?.Value;
+        if (string.IsNullOrWhiteSpace(expectedNonce) || !string.Equals(nonce, expectedNonce, StringComparison.Ordinal))
+        {
+            throw new UnauthorizedAccessException("Invalid Google login nonce.");
+        }
+
         var client = httpClientFactory.CreateClient();
         using var response = await client.GetAsync($"https://oauth2.googleapis.com/tokeninfo?id_token={Uri.EscapeDataString(idToken)}");
         response.EnsureSuccessStatusCode();
@@ -174,6 +202,7 @@ public class AuthService(ApplicationDbContext context, IOtpService otpService, I
         using var json = await JsonDocument.ParseAsync(stream);
         var root = json.RootElement;
         if (!root.TryGetProperty("email_verified", out var verified) || verified.GetString() != "true") throw new UnauthorizedAccessException("Google email is not verified.");
+        if (!root.TryGetProperty("aud", out var aud) || aud.GetString() != clientId) throw new UnauthorizedAccessException("Invalid Google token audience.");
         return new GoogleInfo(root.GetProperty("sub").GetString()!, root.GetProperty("email").GetString()!.ToLowerInvariant(), root.TryGetProperty("name", out var name) ? name.GetString() ?? "Google User" : "Google User");
     }
 

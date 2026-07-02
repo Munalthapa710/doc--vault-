@@ -1,6 +1,7 @@
 using System.Text;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using PersonalVault.Api.Configurations;
 using PersonalVault.Api.Middleware;
@@ -19,6 +20,8 @@ builder.Services.Configure<SecuritySettings>(configuration.GetSection("Security"
 
 var jwt = configuration.GetSection("Jwt").Get<JwtSettings>() ?? new JwtSettings();
 if (string.IsNullOrWhiteSpace(jwt.Key) || jwt.Key.Length < 32) throw new InvalidOperationException("Jwt:Key must be configured and at least 32 characters.");
+var security = configuration.GetSection("Security").Get<SecuritySettings>() ?? new SecuritySettings();
+if (string.IsNullOrWhiteSpace(security.FileEncryptionKey) || security.FileEncryptionKey.Length < 32) throw new InvalidOperationException("Security:FileEncryptionKey must be configured and at least 32 characters.");
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -30,12 +33,24 @@ builder.Services.AddPersonalVaultApiServices();
 var allowedOrigins = configuration.GetSection("Security:AllowedCorsOrigins").Get<string[]>() ?? [];
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("ConfiguredCors", policy => policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod());
+    options.AddPolicy("ConfiguredCors", policy => policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod().AllowCredentials());
 });
 
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddFixedWindowLimiter("Auth", limiter =>
+    {
+        limiter.PermitLimit = 10;
+        limiter.Window = TimeSpan.FromMinutes(1);
+        limiter.QueueLimit = 0;
+    });
+    options.AddFixedWindowLimiter("Upload", limiter =>
+    {
+        limiter.PermitLimit = 12;
+        limiter.Window = TimeSpan.FromMinutes(5);
+        limiter.QueueLimit = 0;
+    });
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
         RateLimitPartition.GetFixedWindowLimiter(context.Connection.RemoteIpAddress?.ToString() ?? "anonymous", _ => new FixedWindowRateLimiterOptions
         {
@@ -68,6 +83,10 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+else
+{
+    app.UseHsts();
 }
 app.UseHttpsRedirection();
 app.UseCors("ConfiguredCors");

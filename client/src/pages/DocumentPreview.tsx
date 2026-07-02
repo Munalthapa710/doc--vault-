@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
 import { Download, FileText } from 'lucide-react';
 import { api, documentApi } from '../api';
+import { PreviewSkeleton } from '../components/LoadingSkeleton';
 
 export function DocumentPreview() {
   const { id = '' } = useParams();
@@ -26,7 +27,7 @@ export function DocumentPreview() {
     anchor.click();
     URL.revokeObjectURL(url);
   };
-  if (isLoading || !doc) return <div className="page-panel">Loading document...</div>;
+  if (isLoading || !doc) return <PreviewSkeleton />;
   const isImage = doc.mimeType.startsWith('image/');
   const isPdf = doc.fileExtension === 'pdf';
   const canRenderPreview = (isImage || isPdf) && previewUrl;
@@ -41,7 +42,7 @@ export function DocumentPreview() {
         <div className="document-preview-actions flex gap-2"><button className="btn-secondary" onClick={download}><Download size={17} />Download</button><Link className="btn-secondary" to="/documents">Back</Link></div>
       </section>
       <section className="page-panel document-preview-panel min-h-[520px] min-w-0 overflow-hidden">
-        {isPreviewLoading && <div className="grid min-h-96 place-items-center text-sm font-bold text-slate-500">Loading preview...</div>}
+        {isPreviewLoading && <div className="skeleton-grid" />}
         {isPreviewError && <PreviewFallback title="Preview failed" message="Download this file to view it locally." />}
         {!isPreviewLoading && !isPreviewError && isImage && canRenderPreview && <img className="document-preview-image mx-auto max-h-[720px] max-w-full rounded-xl object-contain" src={previewUrl} alt={doc.displayName} />}
         {!isPreviewLoading && !isPreviewError && isPdf && canRenderPreview && <iframe className="h-[720px] w-full rounded-xl border border-slate-200" src={previewUrl} title={doc.displayName} />}

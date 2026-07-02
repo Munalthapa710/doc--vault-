@@ -7,7 +7,7 @@ public record LoginRequest([Required, EmailAddress] string Email, [Required] str
 public record SecretWordLoginRequest([Required, EmailAddress] string Email, [Required] string Password, [Required, MinLength(4)] string SecretWord);
 public record VerifyOtpRequest([Required, EmailAddress] string Email, [Required] string Otp, string Purpose);
 public record ResendOtpRequest([Required, EmailAddress] string Email, [Required] string Purpose);
-public record GoogleLoginRequest([Required] string IdToken);
+public record GoogleLoginRequest([Required] string IdToken, [Required] string Nonce);
 public record RefreshTokenRequest([Required] string RefreshToken);
 public record ForgotPasswordRequest([Required, EmailAddress] string Email);
 public record ResetPasswordRequest([Required, EmailAddress] string Email, [Required] string Otp, [Required] string NewPassword);
