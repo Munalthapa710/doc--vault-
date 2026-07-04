@@ -24,7 +24,15 @@ document.documentElement.classList.remove('dark');
 localStorage.removeItem('personalVault.theme');
 applyStoredAppearance();
 
-if ('serviceWorker' in navigator) {
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  let refreshing = false;
+
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) return;
+    refreshing = true;
+    window.location.reload();
+  });
+
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').then((registration) => {
       if (registration.waiting) {
@@ -32,6 +40,14 @@ if ('serviceWorker' in navigator) {
       }
     }).catch(() => undefined);
   });
+} else if (!import.meta.env.PROD && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations()
+    .then((registrations) => {
+      registrations.forEach((registration) => {
+        void registration.unregister();
+      });
+    })
+    .catch(() => undefined);
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

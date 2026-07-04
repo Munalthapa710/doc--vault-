@@ -1,11 +1,19 @@
-const SHELL_CACHE = 'personal-vault-shell-v2';
-const RUNTIME_CACHE = 'personal-vault-runtime-v1';
+const SHELL_CACHE = 'personal-vault-shell-v3';
+const RUNTIME_CACHE = 'personal-vault-runtime-v2';
 const APP_SHELL = [
   '/',
   '/offline.html',
   '/manifest.webmanifest',
   '/vaultlogo.png'
 ];
+
+const isStaticAsset = (url) => (
+  url.pathname.startsWith('/assets/') ||
+  url.pathname.endsWith('.js') ||
+  url.pathname.endsWith('.css') ||
+  url.pathname.endsWith('.png') ||
+  url.pathname.endsWith('.webmanifest')
+);
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(SHELL_CACHE).then((cache) => cache.addAll(APP_SHELL)));
@@ -55,9 +63,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  event.respondWith(
-    caches.match(event.request).then((cached) => (
-      cached || fetch(event.request).then((response) => {
+  if (isStaticAsset(url)) {
+    event.respondWith(
+      fetch(event.request).then((response) => {
         if (!response || response.status !== 200 || response.type !== 'basic') {
           return response;
         }
@@ -65,7 +73,14 @@ self.addEventListener('fetch', (event) => {
         const clone = response.clone();
         caches.open(RUNTIME_CACHE).then((cache) => cache.put(event.request, clone));
         return response;
-      }).catch(() => cached || Response.error())
+      }).catch(() => caches.match(event.request).then((cached) => cached || Response.error()))
+    );
+    return;
+  }
+
+  event.respondWith(
+    caches.match(event.request).then((cached) => (
+      cached || fetch(event.request).then((response) => response)
     ))
   );
 });
