@@ -8,7 +8,10 @@ import { useAppStore } from '../store';
 import { ConfirmDialog } from './ConfirmDialog';
 
 export function Layout() {
-  const { logout, sidebarCollapsed, toggleSidebar, user } = useAppStore();
+  const logout = useAppStore((state) => state.logout);
+  const sidebarCollapsed = useAppStore((state) => state.sidebarCollapsed);
+  const toggleSidebar = useAppStore((state) => state.toggleSidebar);
+  const user = useAppStore((state) => state.user);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileMenuClosing, setMobileMenuClosing] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);

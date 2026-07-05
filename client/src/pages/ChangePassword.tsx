@@ -4,7 +4,8 @@ import { authApi } from '../api';
 import { useAppStore } from '../store';
 
 export function ChangePassword() {
-  const { user, refreshMe } = useAppStore();
+  const user = useAppStore((state) => state.user);
+  const refreshMe = useAppStore((state) => state.refreshMe);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const submit = async (event: FormEvent) => {

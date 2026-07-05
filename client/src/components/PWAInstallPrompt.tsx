@@ -20,6 +20,7 @@ export function PWAInstallPrompt() {
 
   useEffect(() => {
     const onBeforeInstallPrompt = (event: Event) => {
+      if (dismissed || installed) return;
       event.preventDefault();
       setPromptEvent(event as BeforeInstallPromptEvent);
     };
@@ -37,7 +38,7 @@ export function PWAInstallPrompt() {
       window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt);
       window.removeEventListener('appinstalled', onInstalled);
     };
-  }, []);
+  }, [dismissed, installed]);
 
   const dismiss = () => {
     localStorage.setItem(dismissedKey, 'true');
@@ -59,7 +60,7 @@ export function PWAInstallPrompt() {
   return (
     <div className="pwa-install-prompt" role="status">
       <div>
-        <strong>Install Aawaran IMS</strong>
+        <strong>Install Personal Vault</strong>
         <span>Open faster from your home screen.</span>
       </div>
       <button type="button" className="pwa-install-action" onClick={install}>

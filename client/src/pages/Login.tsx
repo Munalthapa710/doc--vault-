@@ -6,7 +6,10 @@ import { useAppStore } from '../store';
 
 export function Login({ mode = 'password' }: { mode?: 'password' | 'otp' }) {
   const navigate = useNavigate();
-  const { requestLoginOtp, loginWithSecretWord, verifyLoginOtp, pendingLoginEmail } = useAppStore();
+  const requestLoginOtp = useAppStore((state) => state.requestLoginOtp);
+  const loginWithSecretWord = useAppStore((state) => state.loginWithSecretWord);
+  const verifyLoginOtp = useAppStore((state) => state.verifyLoginOtp);
+  const pendingLoginEmail = useAppStore((state) => state.pendingLoginEmail);
   const [email, setEmail] = useState(pendingLoginEmail);
   const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');

@@ -6,7 +6,8 @@ import { AppearanceSettings } from '../components/AppearanceSettings';
 import { useAppStore } from '../store';
 
 export function Settings() {
-  const { user, refreshMe } = useAppStore();
+  const user = useAppStore((state) => state.user);
+  const refreshMe = useAppStore((state) => state.refreshMe);
   const [fullName, setFullName] = useState(user?.fullName || '');
   const [emailOtpLoginEnabled, setEmailOtpLoginEnabled] = useState(user?.emailOtpLoginEnabled ?? true);
   const [currentPassword, setCurrentPassword] = useState('');
