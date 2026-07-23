@@ -19,19 +19,24 @@ public class CloudinaryService(IHttpClientFactory httpClientFactory, IOptions<Cl
         }
 
         var folder = $"{settings.Folder.Trim('/')}/{userId}/documents";
-        var publicId = Path.GetFileNameWithoutExtension(safeFileName);
+        var publicId = $"{folder}/{Path.GetFileNameWithoutExtension(safeFileName)}";
         var cloudinary = CreateCloudinary(settings);
 
         if (stream.CanSeek) stream.Position = 0;
-        var result = await cloudinary.UploadLargeAsync(new RawUploadParams
+        RawUploadResult result;
+        try
         {
-            File = new FileDescription(safeFileName, stream),
-            Folder = folder,
-            PublicId = publicId,
-            UseFilename = false,
-            UniqueFilename = false,
-            Overwrite = false
-        }, CloudinaryChunkSizeBytes, cancellationToken);
+            result = await cloudinary.UploadLargeRawAsync(new BasicRawUploadParams
+            {
+                File = new FileDescription(safeFileName, stream),
+                PublicId = publicId,
+                FilenameOverride = safeFileName
+            }, CloudinaryChunkSizeBytes, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Cloudinary upload failed: {ex.Message}", ex);
+        }
 
         if (result.Error is not null)
         {
