@@ -17,11 +17,9 @@ namespace PersonalVault.Api.Service.Document;
 
 public class DocumentService(ApplicationDbContext context, ICloudinaryService cloudinaryService, IFileEncryptionService fileEncryptionService, IAuditLogService auditLogService, IOptions<SecuritySettings> options, IOptions<CloudinarySettings> cloudinaryOptions) : IDocumentService
 {
-    private const long MinimumMaxFileSizeBytes = 104_857_600;
-
     public async Task<DocumentResponse> UploadAsync(string userId, IFormFile file, HttpContext httpContext, CancellationToken cancellationToken)
     {
-        var maxFileSizeBytes = Math.Max(options.Value.MaxFileSizeBytes, MinimumMaxFileSizeBytes);
+        var maxFileSizeBytes = options.Value.MaxFileSizeBytes;
         if (file.Length <= 0) throw new InvalidOperationException("File is empty.");
         if (file.Length > maxFileSizeBytes) throw new InvalidOperationException($"File is too large. Maximum allowed size is {FormatFileSize(maxFileSizeBytes)}.");
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();

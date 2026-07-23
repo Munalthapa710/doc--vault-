@@ -35,11 +35,21 @@ public class CloudinaryService(IHttpClientFactory httpClientFactory, IOptions<Cl
         }
         catch (Exception ex)
         {
+            if (ex.Message.Contains("File size too large", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("Cloudinary rejected this file because the current account raw-file limit is 10 MB. Use a smaller file, upgrade Cloudinary, or switch document storage.", ex);
+            }
+
             throw new InvalidOperationException($"Cloudinary upload failed: {ex.Message}", ex);
         }
 
         if (result.Error is not null)
         {
+            if (result.Error.Message.Contains("File size too large", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("Cloudinary rejected this file because the current account raw-file limit is 10 MB. Use a smaller file, upgrade Cloudinary, or switch document storage.");
+            }
+
             throw new InvalidOperationException($"Cloudinary upload failed: {result.Error.Message}");
         }
 

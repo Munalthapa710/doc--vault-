@@ -15,7 +15,7 @@ public class DocumentsApiController(IDocumentService documentService) : BaseApiC
 {
     [HttpPost("upload")]
     [EnableRateLimiting("Upload")]
-    [RequestSizeLimit(104_857_600)]
+    [RequestSizeLimit(10_485_760)]
     public async Task<IActionResult> Upload(IFormFile file, CancellationToken cancellationToken) => HttpResponse(200, "Document uploaded successfully.", await documentService.UploadAsync(UserId(), file, HttpContext, cancellationToken));
 
     [HttpGet]
