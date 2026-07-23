@@ -6,6 +6,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { OfflineStatus } from './components/OfflineStatus';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
+import { SessionTimeoutWatcher } from './components/SessionTimeoutWatcher';
 import { applyStoredAppearance } from './theme';
 import './styles.css';
 
@@ -55,6 +56,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <App />
+        <SessionTimeoutWatcher />
         <OfflineStatus />
         <PWAInstallPrompt />
         <Toaster position="top-right" />

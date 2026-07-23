@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { api, authApi, storageKeys, User } from './api';
+import { api, authApi, clearStoredSession, storageKeys, User } from './api';
 
 type AppState = {
   user: User | null;
@@ -9,6 +9,8 @@ type AppState = {
   loginWithSecretWord: (email: string, password: string, secretWord: string) => Promise<void>;
   verifyLoginOtp: (email: string, otp: string) => Promise<void>;
   setSession: (accessToken: string, user: User) => void;
+  clearSession: () => void;
+  refreshSession: () => Promise<void>;
   refreshMe: () => Promise<void>;
   logout: () => Promise<void>;
   toggleSidebar: () => void;
@@ -49,6 +51,18 @@ export const useAppStore = create<AppState>((set, get) => ({
     localStorage.setItem(storageKeys.user, JSON.stringify(user));
     set({ user });
   },
+  clearSession: () => {
+    clearStoredSession();
+    sessionStorage.removeItem('personalVault.pendingLoginEmail');
+    set({ user: null, pendingLoginEmail: '' });
+  },
+  refreshSession: async () => {
+    const response = await api.post('/auth/refresh-token');
+    const data = response.data.data;
+    localStorage.setItem(storageKeys.accessToken, data.accessToken);
+    localStorage.setItem(storageKeys.user, JSON.stringify(data.user));
+    set({ user: data.user });
+  },
   refreshMe: async () => {
     const user = await authApi.me();
     localStorage.setItem(storageKeys.user, JSON.stringify(user));
@@ -58,9 +72,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     try {
       await api.post('/auth/logout');
     } finally {
-      localStorage.removeItem(storageKeys.accessToken);
-      localStorage.removeItem(storageKeys.user);
-      set({ user: null });
+      get().clearSession();
     }
   },
   toggleSidebar: () => set({ sidebarCollapsed: !get().sidebarCollapsed })

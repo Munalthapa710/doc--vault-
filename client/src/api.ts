@@ -11,6 +11,21 @@ export const storageKeys = {
   user: 'personalVault.user'
 };
 
+export const sessionEvents = {
+  expired: 'personalVault:session-expired'
+};
+
+export const clearStoredSession = () => {
+  localStorage.removeItem(storageKeys.accessToken);
+  localStorage.removeItem(storageKeys.user);
+};
+
+export const notifySessionExpired = () => {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event(sessionEvents.expired));
+  }
+};
+
 export const api = axios.create({ baseURL: resolveApiBaseUrl(), withCredentials: true });
 
 api.interceptors.request.use((config) => {
@@ -35,8 +50,8 @@ api.interceptors.response.use(
         return api(original);
       } catch (refreshError) {
         if (axios.isAxiosError(refreshError) && [400, 401, 403].includes(refreshError.response?.status || 0)) {
-          localStorage.removeItem(storageKeys.accessToken);
-          localStorage.removeItem(storageKeys.user);
+          clearStoredSession();
+          notifySessionExpired();
           if (!window.location.pathname.startsWith('/login')) window.location.assign('/login');
         }
         return Promise.reject(refreshError);
