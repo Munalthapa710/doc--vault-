@@ -33,6 +33,9 @@ public class ApplicationDbContext
             new CreateIndexModel<DocumentFile>(Builders<DocumentFile>.IndexKeys.Ascending(x => x.UserId)),
             new CreateIndexModel<DocumentFile>(Builders<DocumentFile>.IndexKeys.Ascending(x => x.UserId).Ascending(x => x.IsDeleted)),
             new CreateIndexModel<DocumentFile>(Builders<DocumentFile>.IndexKeys.Ascending(x => x.UserId).Descending(x => x.UploadedAt)),
+            new CreateIndexModel<DocumentFile>(Builders<DocumentFile>.IndexKeys.Ascending(x => x.UserId).Ascending(x => x.IsDeleted).Descending(x => x.UploadedAt)),
+            new CreateIndexModel<DocumentFile>(Builders<DocumentFile>.IndexKeys.Ascending(x => x.UserId).Ascending(x => x.IsDeleted).Ascending(x => x.IsFavorite).Descending(x => x.UpdatedAt)),
+            new CreateIndexModel<DocumentFile>(Builders<DocumentFile>.IndexKeys.Ascending(x => x.UserId).Ascending(x => x.IsDeleted).Descending(x => x.LastDownloadedAt)),
             new CreateIndexModel<DocumentFile>(Builders<DocumentFile>.IndexKeys.Ascending(x => x.Tags))
         ], cancellationToken);
         await RefreshTokens.Indexes.CreateOneAsync(new CreateIndexModel<RefreshToken>(Builders<RefreshToken>.IndexKeys.Ascending(x => x.UserId)), cancellationToken: cancellationToken);

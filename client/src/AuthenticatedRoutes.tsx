@@ -1,8 +1,8 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { TableSkeleton } from './components/LoadingSkeleton';
-import { loadDashboard, loadDocumentPreview, loadDocumentUpload, loadDocumentVault, loadSettings, preloadAuthenticatedRoutes } from './routePreloads';
+import { loadDashboard, loadDocumentPreview, loadDocumentUpload, loadDocumentVault, loadSettings } from './routePreloads';
 import { useAppStore } from './store';
 
 const Dashboard = lazy(() => loadDashboard().then((module) => ({ default: module.Dashboard })));
@@ -22,10 +22,6 @@ function RouteFallback() {
 export function AuthenticatedRoutes() {
   const user = useAppStore((state) => state.user);
   const mustSetPassword = user?.mustChangePassword;
-
-  useEffect(() => {
-    preloadAuthenticatedRoutes();
-  }, []);
 
   return (
     <Suspense fallback={<RouteFallback />}>
