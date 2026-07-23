@@ -15,6 +15,7 @@ public static class FileHelpers
         [".docx"] = ["application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/octet-stream"],
         [".xls"] = ["application/vnd.ms-excel", "application/octet-stream"],
         [".xlsx"] = ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/octet-stream"],
+        [".zip"] = ["application/zip", "application/x-zip-compressed", "application/octet-stream"],
         [".txt"] = ["text/plain"]
     };
 
@@ -38,7 +39,7 @@ public static class FileHelpers
             ".webp" => read >= 12 && header[0] == 0x52 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x46 && header[8] == 0x57 && header[9] == 0x45 && header[10] == 0x42 && header[11] == 0x50,
             ".pdf" => read >= 5 && header[0] == 0x25 && header[1] == 0x50 && header[2] == 0x44 && header[3] == 0x46 && header[4] == 0x2d,
             ".doc" or ".xls" => HasPrefix(header, read, new byte[] { 0xd0, 0xcf, 0x11, 0xe0 }),
-            ".docx" or ".xlsx" => HasPrefix(header, read, new byte[] { 0x50, 0x4b, 0x03, 0x04 }) || HasPrefix(header, read, new byte[] { 0x50, 0x4b, 0x05, 0x06 }) || HasPrefix(header, read, new byte[] { 0x50, 0x4b, 0x07, 0x08 }),
+            ".docx" or ".xlsx" or ".zip" => HasPrefix(header, read, new byte[] { 0x50, 0x4b, 0x03, 0x04 }) || HasPrefix(header, read, new byte[] { 0x50, 0x4b, 0x05, 0x06 }) || HasPrefix(header, read, new byte[] { 0x50, 0x4b, 0x07, 0x08 }),
             ".txt" => read > 0 && header.Take(read).All(x => (x is 0x09 or 0x0a or 0x0d) || x >= 0x20),
             _ => false
         };

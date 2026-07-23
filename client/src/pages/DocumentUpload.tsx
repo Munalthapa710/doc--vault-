@@ -40,7 +40,7 @@ export function DocumentUpload() {
         <div>
           <span className="eyebrow">Cloudinary private storage</span>
           <h1>Upload Document</h1>
-          <p>Allowed: JPG, PNG, WEBP, PDF, DOC, DOCX, XLS, XLSX, TXT. You can upload multiple files at once.</p>
+          <p>Allowed: JPG, PNG, WEBP, PDF, DOC, DOCX, XLS, XLSX, ZIP, TXT. You can upload multiple files at once.</p>
         </div>
       </section>
       <section className="page-panel min-w-0 overflow-hidden">
@@ -53,7 +53,7 @@ export function DocumentUpload() {
             </p>
             <label className="btn-secondary upload-file-label mt-5 cursor-pointer">
               Choose Files
-              <input className="upload-file-input" type="file" accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx,.xls,.xlsx,.txt" multiple onChange={(e) => pick(e.target.files)} />
+              <input className="upload-file-input" type="file" accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx,.xls,.xlsx,.zip,.txt" multiple onChange={(e) => pick(e.target.files)} />
             </label>
           </div>
         </div>
