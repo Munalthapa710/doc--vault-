@@ -8,6 +8,8 @@ namespace PersonalVault.Api.Service.Cloudinary;
 
 public class CloudinaryService(IHttpClientFactory httpClientFactory, IOptions<CloudinarySettings> options) : ICloudinaryService
 {
+    private const int CloudinaryChunkSizeBytes = 6 * 1024 * 1024;
+
     public async Task<CloudinaryUploadResult> UploadRawAsync(Stream stream, string userId, string safeFileName, CancellationToken cancellationToken)
     {
         var settings = options.Value;
@@ -21,7 +23,7 @@ public class CloudinaryService(IHttpClientFactory httpClientFactory, IOptions<Cl
         var cloudinary = CreateCloudinary(settings);
 
         if (stream.CanSeek) stream.Position = 0;
-        var result = await cloudinary.UploadAsync(new RawUploadParams
+        var result = await cloudinary.UploadLargeAsync(new RawUploadParams
         {
             File = new FileDescription(safeFileName, stream),
             Folder = folder,
@@ -29,7 +31,7 @@ public class CloudinaryService(IHttpClientFactory httpClientFactory, IOptions<Cl
             UseFilename = false,
             UniqueFilename = false,
             Overwrite = false
-        }, "raw", cancellationToken);
+        }, CloudinaryChunkSizeBytes, cancellationToken);
 
         if (result.Error is not null)
         {
