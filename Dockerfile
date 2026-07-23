@@ -10,5 +10,7 @@ RUN dotnet publish PersonalVault.Api/PersonalVault.Api.csproj -c Release -o /app
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 WORKDIR /app
 ENV ASPNETCORE_URLS=http://0.0.0.0:${PORT}
+ENV DOTNET_hostBuilder__reloadConfigOnChange=false
+ENV ASPNETCORE_hostBuilder__reloadConfigOnChange=false
 COPY --from=build /app/publish ./
 ENTRYPOINT ["dotnet", "PersonalVault.Api.dll"]

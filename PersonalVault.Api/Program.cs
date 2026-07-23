@@ -8,6 +8,9 @@ using PersonalVault.Api.Middleware;
 using PersonalVault.Api.Data;
 using PersonalVault.Api;
 
+Environment.SetEnvironmentVariable("DOTNET_hostBuilder__reloadConfigOnChange", "false");
+Environment.SetEnvironmentVariable("ASPNETCORE_hostBuilder__reloadConfigOnChange", "false");
+
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
