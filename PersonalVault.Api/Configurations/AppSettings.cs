@@ -39,7 +39,7 @@ public class GoogleAuthSettings
 public class SecuritySettings
 {
     public string[] AllowedCorsOrigins { get; set; } = [];
-    public long MaxFileSizeBytes { get; set; } = 60_000_000;
+    public long MaxFileSizeBytes { get; set; } = 104_857_600;
     public string FileEncryptionKey { get; set; } = string.Empty;
     public int ResendOtpCooldownSeconds { get; set; } = 60;
     public int OtpExpiryMinutes { get; set; } = 5;

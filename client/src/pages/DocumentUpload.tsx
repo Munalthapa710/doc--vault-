@@ -4,7 +4,7 @@ import { UploadCloud, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { documentApi } from '../api';
 
-const MAX_FILE_SIZE_BYTES = 60_000_000;
+const MAX_FILE_SIZE_BYTES = 104_857_600;
 const formatFileSize = (bytes: number) => `${(bytes / 1048576).toFixed(2)} MB`;
 
 export function DocumentUpload() {
