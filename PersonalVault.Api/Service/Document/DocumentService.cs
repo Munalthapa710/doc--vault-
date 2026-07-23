@@ -19,7 +19,8 @@ public class DocumentService(ApplicationDbContext context, ICloudinaryService cl
 {
     public async Task<DocumentResponse> UploadAsync(string userId, IFormFile file, HttpContext httpContext, CancellationToken cancellationToken)
     {
-        if (file.Length <= 0 || file.Length > options.Value.MaxFileSizeBytes) throw new InvalidOperationException("Invalid file size.");
+        if (file.Length <= 0) throw new InvalidOperationException("File is empty.");
+        if (file.Length > options.Value.MaxFileSizeBytes) throw new InvalidOperationException($"File is too large. Maximum allowed size is {FormatFileSize(options.Value.MaxFileSizeBytes)}.");
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (!await FileHelpers.IsAllowedFileAsync(file, extension, cancellationToken)) throw new InvalidOperationException("File type is not allowed.");
         var safeFileName = $"{Guid.NewGuid():N}.enc";
@@ -139,6 +140,8 @@ public class DocumentService(ApplicationDbContext context, ICloudinaryService cl
         if (!includeDeleted) filter &= Builders<DocumentFile>.Filter.Eq(x => x.IsDeleted, false);
         return await context.Documents.Find(filter).FirstOrDefaultAsync() ?? throw new KeyNotFoundException("Document not found.");
     }
+
+    private static string FormatFileSize(long bytes) => bytes < 1048576 ? $"{bytes / 1024d:0.#} KB" : $"{bytes / 1048576d:0.#} MB";
 
     private static DocumentResponse Map(DocumentFile doc) => new()
     {

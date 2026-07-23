@@ -27,7 +27,8 @@ public class DashboardService(ApplicationDbContext context) : IDashboardService
             .Group(new BsonDocument
             {
                 ["_id"] = "$FileExtension",
-                ["count"] = new BsonDocument("$sum", 1)
+                ["count"] = new BsonDocument("$sum", 1),
+                ["storage"] = new BsonDocument("$sum", "$FileSize")
             })
             .ToListAsync();
         var recentUploadsTask = context.Documents.Find(activeFilter)
@@ -42,23 +43,32 @@ public class DashboardService(ApplicationDbContext context) : IDashboardService
             .SortByDescending(x => x.LastDownloadedAt)
             .Limit(5)
             .ToListAsync();
+        var largestDocumentsTask = context.Documents.Find(activeFilter)
+            .SortByDescending(x => x.FileSize)
+            .Limit(5)
+            .ToListAsync();
         var userTask = context.Users.Find(x => x.Id == userId).FirstOrDefaultAsync();
 
-        await Task.WhenAll(totalDocumentsTask, storageTask, typeCountsTask, recentUploadsTask, favoriteDocumentsTask, lastDownloadedDocumentsTask, userTask);
+        await Task.WhenAll(totalDocumentsTask, storageTask, typeCountsTask, recentUploadsTask, favoriteDocumentsTask, lastDownloadedDocumentsTask, largestDocumentsTask, userTask);
 
         var storage = storageTask.Result;
         var typeCounts = typeCountsTask.Result
             .Where(x => x["_id"].IsString)
             .ToDictionary(x => x["_id"].AsString, x => x["count"].ToInt64());
+        var storageByType = typeCountsTask.Result
+            .Where(x => x["_id"].IsString)
+            .ToDictionary(x => x["_id"].AsString, x => x["storage"].ToInt64());
 
         return new DashboardSummaryResponse
         {
             TotalDocuments = totalDocumentsTask.Result,
             TotalStorageUsed = storage is null ? 0 : storage["totalStorageUsed"].ToInt64(),
             DocumentsByType = typeCounts,
+            StorageByType = storageByType,
             RecentUploads = recentUploadsTask.Result.Select(Map).ToList(),
             FavoriteDocuments = favoriteDocumentsTask.Result.Select(Map).ToList(),
             LastDownloadedDocuments = lastDownloadedDocumentsTask.Result.Select(Map).ToList(),
+            LargestDocuments = largestDocumentsTask.Result.Select(Map).ToList(),
             LastLoginAt = userTask.Result?.LastLoginAt
         };
     }

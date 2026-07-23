@@ -4,6 +4,7 @@ import { UploadCloud, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { documentApi } from '../api';
 
+const MAX_FILE_SIZE_BYTES = 60_000_000;
 const formatFileSize = (bytes: number) => `${(bytes / 1048576).toFixed(2)} MB`;
 
 export function DocumentUpload() {
@@ -12,7 +13,15 @@ export function DocumentUpload() {
   const [uploadedCount, setUploadedCount] = useState(0);
   const navigate = useNavigate();
 
-  const pick = (fileList: FileList | null) => setFiles(Array.from(fileList || []));
+  const pick = (fileList: FileList | null) => {
+    const selectedFiles = Array.from(fileList || []);
+    const validFiles = selectedFiles.filter((file) => file.size > 0 && file.size <= MAX_FILE_SIZE_BYTES);
+    const rejectedFiles = selectedFiles.filter((file) => file.size <= 0 || file.size > MAX_FILE_SIZE_BYTES);
+    if (rejectedFiles.length > 0) {
+      toast.error(`Some files were skipped. Maximum size is ${formatFileSize(MAX_FILE_SIZE_BYTES)}.`);
+    }
+    setFiles(validFiles);
+  };
   const drop = (event: DragEvent<HTMLDivElement>) => { event.preventDefault(); pick(event.dataTransfer.files); };
   const removeFile = (indexToRemove: number) => setFiles((selectedFiles) => selectedFiles.filter((_, index) => index !== indexToRemove));
 
@@ -40,7 +49,7 @@ export function DocumentUpload() {
         <div>
           <span className="eyebrow">Cloudinary private storage</span>
           <h1>Upload Document</h1>
-          <p>Allowed: JPG, PNG, WEBP, PDF, DOC, DOCX, XLS, XLSX, ZIP, TXT. You can upload multiple files at once.</p>
+          <p>Allowed: JPG, PNG, WEBP, PDF, DOC, DOCX, XLS, XLSX, ZIP, TXT. Maximum size: {formatFileSize(MAX_FILE_SIZE_BYTES)} per file.</p>
         </div>
       </section>
       <section className="page-panel min-w-0 overflow-hidden">

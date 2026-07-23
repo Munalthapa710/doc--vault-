@@ -38,9 +38,11 @@ public class DashboardSummaryResponse
     public long TotalDocuments { get; set; }
     public long TotalStorageUsed { get; set; }
     public Dictionary<string, long> DocumentsByType { get; set; } = [];
+    public Dictionary<string, long> StorageByType { get; set; } = [];
     public IReadOnlyList<DocumentResponse> RecentUploads { get; set; } = [];
     public IReadOnlyList<DocumentResponse> FavoriteDocuments { get; set; } = [];
     public IReadOnlyList<DocumentResponse> LastDownloadedDocuments { get; set; } = [];
+    public IReadOnlyList<DocumentResponse> LargestDocuments { get; set; } = [];
     public DateTime? LastLoginAt { get; set; }
 }
 

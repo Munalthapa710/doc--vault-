@@ -101,9 +101,11 @@ export type DashboardSummary = {
   totalDocuments: number;
   totalStorageUsed: number;
   documentsByType: Record<string, number>;
+  storageByType: Record<string, number>;
   recentUploads: DocumentItem[];
   favoriteDocuments: DocumentItem[];
   lastDownloadedDocuments: DocumentItem[];
+  largestDocuments: DocumentItem[];
   lastLoginAt?: string;
 };
 
