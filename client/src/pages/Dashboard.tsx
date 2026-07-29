@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis, ZAxis } from 'recharts';
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Archive, Clock3, Database, FileText, HardDrive, Layers3, Star, UploadCloud } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { dashboardApi, DocumentItem } from '../api';
@@ -61,21 +61,20 @@ export function Dashboard() {
         <div className="page-panel min-w-0">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="panel-title">File Type Dot Plot</h2>
-              <p className="mt-1 text-sm font-bold text-slate-500">Document count by file type, sized by storage.</p>
+              <h2 className="panel-title">File Type Bar Chart</h2>
+              <p className="mt-1 text-sm font-bold text-slate-500">Document count by file type with storage details.</p>
             </div>
             <span className="document-type-pill">{largestType ? `${largestType.type} leads` : 'Empty vault'}</span>
           </div>
           <div className="h-[320px] min-w-0">
             {typeRows.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <ScatterChart margin={{ top: 12, right: 18, bottom: 16, left: 18 }}>
+                <BarChart data={typeRows} layout="vertical" margin={{ top: 12, right: 18, bottom: 16, left: 18 }}>
                   <XAxis type="number" dataKey="count" allowDecimals={false} tickLine={false} axisLine={false} tick={{ fill: '#64748b', fontSize: 12, fontWeight: 700 }} />
                   <YAxis type="category" dataKey="type" width={58} tickLine={false} axisLine={false} tick={{ fill: '#334155', fontSize: 12, fontWeight: 900 }} />
-                  <ZAxis type="number" dataKey="storage" range={[90, 430]} />
-                  <Tooltip cursor={{ stroke: '#cbd5e1', strokeDasharray: '4 4' }} content={<DotTooltip />} />
-                  <Scatter data={typeRows} fill="#0891b2" />
-                </ScatterChart>
+                  <Tooltip cursor={{ fill: '#f1f5f9' }} content={<BarTooltip />} />
+                  <Bar dataKey="count" fill="#0891b2" radius={[0, 8, 8, 0]} barSize={26} />
+                </BarChart>
               </ResponsiveContainer>
             ) : (
               <EmptyState icon={<Archive size={38} />} title="No document types yet" />
@@ -130,7 +129,7 @@ function Stat({ icon, label, value, detail }: { icon: React.ReactNode; label: st
   );
 }
 
-function DotTooltip({ active, payload }: { active?: boolean; payload?: Array<{ payload: { type: string; count: number; storage: number; share: number } }> }) {
+function BarTooltip({ active, payload }: { active?: boolean; payload?: Array<{ payload: { type: string; count: number; storage: number; share: number } }> }) {
   if (!active || !payload?.length) return null;
   const row = payload[0].payload;
   return (
