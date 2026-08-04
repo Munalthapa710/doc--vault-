@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { Archive, Clock3, Database, FileText, HardDrive, Layers3, Star, UploadCloud } from 'lucide-react';
+import { Archive, Database, FileText, HardDrive, Layers3, Star, UploadCloud } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { dashboardApi, DocumentItem } from '../api';
 import { DashboardSkeleton } from '../components/LoadingSkeleton';
@@ -38,7 +38,6 @@ export function Dashboard() {
     );
   }
 
-  const averageSize = data.totalDocuments > 0 ? data.totalStorageUsed / data.totalDocuments : 0;
   const largestType = typeRows[0];
   const latestUpload = data.recentUploads[0];
   const largestFile = data.largestDocuments[0];
@@ -50,11 +49,10 @@ export function Dashboard() {
         <Link className="btn-primary" to="/documents/upload">Upload Document</Link>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Stat icon={<FileText />} label="Documents" value={data.totalDocuments.toString()} detail={`${typeRows.length} active file types`} />
-        <Stat icon={<HardDrive />} label="Storage Used" value={formatBytes(data.totalStorageUsed)} detail={`${formatBytes(averageSize)} average size`} />
-        <Stat icon={<Star />} label="Favorites" value={data.favoriteDocuments.length.toString()} detail={data.favoriteDocuments[0]?.displayName || 'No favorites yet'} />
-        <Stat icon={<Clock3 />} label="Last Login" value={formatDate(data.lastLoginAt)} detail={latestUpload ? `Latest upload ${formatDate(latestUpload.uploadedAt)}` : 'No uploads yet'} />
+      <section className="dashboard-summary-row">
+        <SummaryStat icon={<FileText size={22} />} label="Documents" value={data.totalDocuments.toString()} />
+        <SummaryStat icon={<HardDrive size={22} />} label="Storage Used" value={formatBytes(data.totalStorageUsed)} />
+        <SummaryStat icon={<Star size={22} />} label="Favorites" value={data.favoriteDocuments.length.toString()} />
       </section>
 
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
@@ -118,13 +116,12 @@ export function Dashboard() {
   );
 }
 
-function Stat({ icon, label, value, detail }: { icon: React.ReactNode; label: string; value: string; detail: string }) {
+function SummaryStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="stat-card">
-      <div className="grid h-11 w-11 place-items-center rounded-xl bg-cyan-50 text-cyan-700">{icon}</div>
+    <div className="dashboard-summary-card">
+      <div className="dashboard-summary-icon">{icon}</div>
       <span>{label}</span>
       <strong>{value}</strong>
-      <small className="mt-1 block truncate text-xs font-bold text-slate-500">{detail}</small>
     </div>
   );
 }

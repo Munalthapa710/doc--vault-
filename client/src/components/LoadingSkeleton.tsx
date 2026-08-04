@@ -53,8 +53,7 @@ export function DashboardSkeleton() {
         <div className="skeleton-copy wide" />
         <div className="skeleton-icon" />
       </section>
-      <section className="grid gap-4 md:grid-cols-4">
-        <div className="skeleton-card" />
+      <section className="dashboard-summary-row">
         <div className="skeleton-card" />
         <div className="skeleton-card" />
         <div className="skeleton-card" />
