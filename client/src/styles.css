@@ -780,6 +780,7 @@ textarea {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 5px;
   min-width: 54px;
   border-radius: 999px;
   background: var(--app-primary-soft);
@@ -787,6 +788,128 @@ textarea {
   padding: 5px 9px;
   font-size: 0.72rem;
   font-weight: 950;
+}
+
+.document-type-pill svg {
+  width: 14px;
+  height: 14px;
+}
+
+.document-file-thumb {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--file-border, #e2e8f0);
+  border-radius: 10px;
+  background: var(--file-bg, #f8fafc);
+  color: var(--file-color, var(--app-primary-strong));
+  overflow: hidden;
+}
+
+.document-file-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.document-file-thumb-pdf,
+.document-type-pill-pdf,
+.document-mobile-type-pdf,
+.document-mobile-card-pdf {
+  --file-bg: #fee2e2;
+  --file-border: #fecaca;
+  --file-color: #b91c1c;
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.document-file-thumb-image,
+.document-type-pill-image,
+.document-mobile-type-image,
+.document-mobile-card-image {
+  --file-bg: #dcfce7;
+  --file-border: #bbf7d0;
+  --file-color: #15803d;
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.document-file-thumb-word,
+.document-type-pill-word,
+.document-mobile-type-word,
+.document-mobile-card-word {
+  --file-bg: #dbeafe;
+  --file-border: #bfdbfe;
+  --file-color: #1d4ed8;
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.document-file-thumb-excel,
+.document-type-pill-excel,
+.document-mobile-type-excel,
+.document-mobile-card-excel {
+  --file-bg: #ccfbf1;
+  --file-border: #99f6e4;
+  --file-color: #0f766e;
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.document-file-thumb-zip,
+.document-type-pill-zip,
+.document-mobile-type-zip,
+.document-mobile-card-zip {
+  --file-bg: #fef3c7;
+  --file-border: #fde68a;
+  --file-color: #92400e;
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.document-file-thumb-presentation,
+.document-type-pill-presentation,
+.document-mobile-type-presentation,
+.document-mobile-card-presentation {
+  --file-bg: #ffedd5;
+  --file-border: #fed7aa;
+  --file-color: #c2410c;
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.document-file-thumb-video,
+.document-type-pill-video,
+.document-mobile-type-video,
+.document-mobile-card-video {
+  --file-bg: #f3e8ff;
+  --file-border: #e9d5ff;
+  --file-color: #7e22ce;
+  background: #f3e8ff;
+  color: #7e22ce;
+}
+
+.document-file-thumb-audio,
+.document-type-pill-audio,
+.document-mobile-type-audio,
+.document-mobile-card-audio {
+  --file-bg: #fae8ff;
+  --file-border: #f5d0fe;
+  --file-color: #a21caf;
+  background: #fae8ff;
+  color: #a21caf;
+}
+
+.document-file-thumb-default,
+.document-type-pill-default,
+.document-mobile-type-default,
+.document-mobile-card-default {
+  --file-bg: #f1f5f9;
+  --file-border: #e2e8f0;
+  --file-color: #475569;
+  background: #f1f5f9;
+  color: #475569;
 }
 
 .document-preview-header {
@@ -2023,6 +2146,63 @@ textarea {
     width: 34px;
     height: 34px;
     border-radius: 11px;
+  }
+
+  .document-mobile-card {
+    display: grid;
+    grid-template-columns: 50px minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #eef2f7;
+    background: linear-gradient(90deg, var(--file-bg, #f8fafc) 0 4px, #fff 4px);
+  }
+
+  .document-mobile-card:last-child {
+    border-bottom: 0;
+  }
+
+  .document-mobile-title-row {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .document-mobile-title-row svg {
+    flex-shrink: 0;
+    color: #eab308;
+  }
+
+  .document-mobile-type {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 3px 7px;
+    font-size: 0.6rem;
+    font-weight: 950;
+    line-height: 1;
+  }
+
+  .document-mobile-type::before {
+    display: none !important;
+  }
+
+  .document-mobile-card .mobile-data-actions {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .document-mobile-card .table-actions {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .document-mobile-card .icon-button {
+    width: 100%;
+    height: 38px;
+    border-radius: 12px;
   }
 
   .mobile-tool-grid {

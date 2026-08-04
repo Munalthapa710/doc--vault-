@@ -1,7 +1,28 @@
 import { FormEvent, type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { type ColumnDef } from '@tanstack/react-table';
-import { Check, ChevronDown, Download, Eye, File, Heart, Pencil, Plus, RotateCcw, Search, Trash2, X } from 'lucide-react';
+import {
+  Check,
+  ChevronDown,
+  Download,
+  Eye,
+  File,
+  FileArchive,
+  FileAudio,
+  FileImage,
+  FileSpreadsheet,
+  FileText,
+  FileType,
+  FileVideo,
+  Heart,
+  Pencil,
+  Plus,
+  Presentation,
+  RotateCcw,
+  Search,
+  Trash2,
+  X
+} from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { api, documentApi, DocumentItem } from '../api';
@@ -10,6 +31,29 @@ import { DataTable } from '../components/DataTable';
 import { TableSkeleton } from '../components/LoadingSkeleton';
 
 const formatBytes = (bytes: number) => bytes < 1048576 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / 1048576).toFixed(1)} MB`;
+const typeGroups: Record<string, string[]> = {
+  pdf: ['pdf'],
+  image: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'],
+  word: ['doc', 'docx', 'txt', 'rtf'],
+  excel: ['xls', 'xlsx', 'csv'],
+  zip: ['zip', 'rar', '7z', 'tar', 'gz'],
+  presentation: ['ppt', 'pptx'],
+  video: ['mp4', 'mov', 'avi', 'mkv', 'webm'],
+  audio: ['mp3', 'wav', 'm4a', 'aac', 'flac']
+};
+
+const fileTypeFor = (doc: DocumentItem) => {
+  const extension = doc.fileExtension.toLowerCase();
+  if (typeGroups.pdf.includes(extension)) return { className: 'pdf', icon: <FileText size={22} />, label: 'PDF' };
+  if (typeGroups.image.includes(extension) || doc.mimeType.startsWith('image/')) return { className: 'image', icon: <FileImage size={22} />, label: 'Image' };
+  if (typeGroups.word.includes(extension)) return { className: 'word', icon: <FileType size={22} />, label: 'Word' };
+  if (typeGroups.excel.includes(extension)) return { className: 'excel', icon: <FileSpreadsheet size={22} />, label: 'Excel' };
+  if (typeGroups.zip.includes(extension)) return { className: 'zip', icon: <FileArchive size={22} />, label: 'Archive' };
+  if (typeGroups.presentation.includes(extension)) return { className: 'presentation', icon: <Presentation size={22} />, label: 'Slides' };
+  if (typeGroups.video.includes(extension)) return { className: 'video', icon: <FileVideo size={22} />, label: 'Video' };
+  if (typeGroups.audio.includes(extension)) return { className: 'audio', icon: <FileAudio size={22} />, label: 'Audio' };
+  return { className: 'default', icon: <File size={22} />, label: extension ? extension.toUpperCase() : 'File' };
+};
 
 export function DocumentVault() {
   const queryClient = useQueryClient();
@@ -170,7 +214,7 @@ export function DocumentVault() {
         </div>
       )
     },
-    { header: 'Type', cell: ({ row }) => <span className="document-type-pill">{row.original.fileExtension.toUpperCase()}</span> },
+    { header: 'Type', cell: ({ row }) => <DocumentTypePill doc={row.original} /> },
     { header: 'Size', cell: ({ row }) => formatBytes(row.original.fileSize) },
     { header: 'Uploaded', cell: ({ row }) => new Date(row.original.uploadedAt).toLocaleDateString() },
     { header: 'Category', cell: ({ row }) => categoryFor(row.original) },
@@ -299,6 +343,7 @@ export function DocumentVault() {
 
 function DocumentThumb({ doc }: { doc: DocumentItem }) {
   const isImage = doc.mimeType.startsWith('image/') && !doc.isDeleted;
+  const type = fileTypeFor(doc);
   const { data: previewBlob } = useQuery({
     queryKey: ['document-thumb', doc.id],
     queryFn: async () => (await api.get(`/documents/${doc.id}/preview`, { responseType: 'blob' })).data as Blob,
@@ -311,19 +356,38 @@ function DocumentThumb({ doc }: { doc: DocumentItem }) {
   }, [previewUrl]);
 
   return (
-    <span className="mobile-list-thumb">
-      {previewUrl ? <img src={previewUrl} alt={doc.displayName} loading="lazy" /> : <File size={22} />}
+    <span className={`document-file-thumb document-file-thumb-${type.className}`}>
+      {previewUrl ? <img src={previewUrl} alt={doc.displayName} loading="lazy" /> : type.icon}
+    </span>
+  );
+}
+
+function DocumentTypePill({ doc }: { doc: DocumentItem }) {
+  const type = fileTypeFor(doc);
+  return (
+    <span className={`document-type-pill document-type-pill-${type.className}`}>
+      {type.icon}
+      {doc.fileExtension.toUpperCase()}
     </span>
   );
 }
 
 function DocumentMobileRow({ doc, actions }: { doc: DocumentItem; actions: ReactNode }) {
+  const type = fileTypeFor(doc);
   return (
-    <article className="mobile-list-row rounded-xl border border-slate-200 bg-white shadow-sm">
+    <article className={`document-mobile-card document-mobile-card-${type.className}`}>
       <DocumentThumb doc={doc} />
       <div className="mobile-list-main">
-        <strong>{doc.displayName}</strong>
-        <div className="mobile-list-meta"><span>{doc.fileExtension.toUpperCase()}</span><span>{formatBytes(doc.fileSize)}</span><span>{new Date(doc.uploadedAt).toLocaleDateString()}</span></div>
+        <div className="document-mobile-title-row">
+          <strong>{doc.displayName}</strong>
+          {doc.isFavorite && <Heart size={15} fill="currentColor" />}
+        </div>
+        <div className="mobile-list-meta">
+          <span className={`document-mobile-type document-mobile-type-${type.className}`}>{type.label}</span>
+          <span>{doc.fileExtension.toUpperCase()}</span>
+          <span>{formatBytes(doc.fileSize)}</span>
+          <span>{new Date(doc.uploadedAt).toLocaleDateString()}</span>
+        </div>
       </div>
       <div className="mobile-data-actions">{actions}</div>
     </article>
