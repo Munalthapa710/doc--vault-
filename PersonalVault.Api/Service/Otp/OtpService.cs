@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-using PersonalVault.Api.Configurations;
+using PersonalVault.Api.Configuration;
 using PersonalVault.Api.Helpers;
 using PersonalVault.Api.Model.Auth;
 using PersonalVault.Api.Model.Document;

@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
-using PersonalVault.Api.Configurations;
+using PersonalVault.Api.Configuration;
 
 namespace PersonalVault.Api.Service.Encryption;
 

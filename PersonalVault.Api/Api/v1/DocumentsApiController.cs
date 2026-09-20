@@ -2,7 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using PersonalVault.Api.Common;
+using PersonalVault.Api.Api;
 using PersonalVault.Api.ViewModel.Auth;
 using PersonalVault.Api.ViewModel.Document;
 using PersonalVault.Api.Service.Document;

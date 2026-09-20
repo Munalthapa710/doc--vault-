@@ -1,4 +1,4 @@
-using PersonalVault.Api.Common;
+using PersonalVault.Api.ViewModel.Common;
 using PersonalVault.Api.ViewModel.Document;
 
 namespace PersonalVault.Api.Service.Document;

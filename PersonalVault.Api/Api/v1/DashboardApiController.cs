@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PersonalVault.Api.Common;
+using PersonalVault.Api.Api;
 using PersonalVault.Api.Service.Dashboard;
 
 namespace PersonalVault.Api.Api.v1;

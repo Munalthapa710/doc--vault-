@@ -3,7 +3,7 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
-using PersonalVault.Api.Configurations;
+using PersonalVault.Api.Configuration;
 using PersonalVault.Api.Middleware;
 using PersonalVault.Api.Data;
 using PersonalVault.Api;

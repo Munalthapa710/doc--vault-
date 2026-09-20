@@ -1,4 +1,4 @@
-namespace PersonalVault.Api.Configurations;
+namespace PersonalVault.Api.Configuration;
 
 public class MongoDbSettings
 {

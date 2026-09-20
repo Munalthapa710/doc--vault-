@@ -1,7 +1,7 @@
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.Extensions.Options;
-using PersonalVault.Api.Configurations;
+using PersonalVault.Api.Configuration;
 using CloudinaryClient = CloudinaryDotNet.Cloudinary;
 
 namespace PersonalVault.Api.Service.Cloudinary;

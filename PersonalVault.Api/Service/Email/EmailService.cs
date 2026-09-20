@@ -2,7 +2,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
-using PersonalVault.Api.Configurations;
+using PersonalVault.Api.Configuration;
 
 namespace PersonalVault.Api.Service.Email;
 

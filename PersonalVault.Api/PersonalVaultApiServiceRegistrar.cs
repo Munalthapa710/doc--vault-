@@ -2,6 +2,7 @@ using PersonalVault.Api.Service.AuditLog;
 using PersonalVault.Api.Service.Auth;
 using PersonalVault.Api.Service.Cloudinary;
 using PersonalVault.Api.Service.Dashboard;
+using PersonalVault.Api.Service.Dapper;
 using PersonalVault.Api.Service.Document;
 using PersonalVault.Api.Service.Email;
 using PersonalVault.Api.Service.Encryption;
@@ -23,6 +24,7 @@ public static class PersonalVaultApiServiceRegistrar
         services.AddScoped<IFileEncryptionService, FileEncryptionService>();
         services.AddScoped<IDocumentService, DocumentService>();
         services.AddScoped<IDashboardService, DashboardService>();
+        services.AddScoped<IDapperConnectionFactory, SqlConnectionFactory>();
 
         return services;
     }
