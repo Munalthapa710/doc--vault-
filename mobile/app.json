@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "Personal Vault",
+    "slug": "personal-vault-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "personalvault",
+    "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#F7FAFC"
+      }
+    },
+    "extra": {
+      "apiUrl": ""
+    },
+    "plugins": [
+      "expo-font"
+    ]
+  }
+}
