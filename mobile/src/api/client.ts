@@ -1,8 +1,23 @@
 import axios from 'axios';
-import { Platform } from 'react-native';
+import { NativeModules, Platform } from 'react-native';
 import type { ApiResponse, DashboardSummary, DocumentItem, ListResponse, TokenResponse, User } from '../types/api';
 
-const defaultBaseUrl = Platform.OS === 'android' ? 'http://10.0.2.2:5000/api' : 'http://localhost:5000/api';
+const API_PORT = '5000';
+const API_PATH = '/api';
+
+function getExpoHost() {
+  const scriptURL = NativeModules.SourceCode?.scriptURL as string | undefined;
+  const host = scriptURL?.match(/^[a-z]+:\/\/([^/:]+)(?::\d+)?/i)?.[1];
+
+  if (!host || host === 'localhost' || host === '127.0.0.1') {
+    return undefined;
+  }
+
+  return host;
+}
+
+const fallbackHost = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
+const defaultBaseUrl = `http://${getExpoHost() || fallbackHost}:${API_PORT}${API_PATH}`;
 
 export const API_BASE_URL = (process.env.EXPO_PUBLIC_API_URL || defaultBaseUrl).replace(/\/+$/, '');
 

@@ -15,13 +15,16 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#F7FAFC"
-      }
+      },
+      "package": "com.anonymous.personalvaultmobile"
     },
     "extra": {
       "apiUrl": ""
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      "expo-secure-store",
+      "expo-status-bar"
     ]
   }
 }
