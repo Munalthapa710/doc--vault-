@@ -39,12 +39,16 @@ export const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (axios.isAxiosError(error) && error.message === 'Network Error') {
-      return Promise.reject(
-        new Error(
-          `Cannot reach the API at ${API_BASE_URL}. Make sure the backend is running, your iPhone is on the same Wi-Fi as this computer, and EXPO_PUBLIC_API_URL points to your computer IP.`
-        )
-      );
+    if (axios.isAxiosError(error) && !error.response) {
+      const timedOut = error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT';
+      const networkFailed = error.code === 'ERR_NETWORK' || error.message === 'Network Error';
+
+      if (timedOut || networkFailed) {
+        const address = error.config?.baseURL || API_BASE_URL;
+        const reason = timedOut ? 'The server did not respond in time.' : 'Cannot connect to the server.';
+        // Preserve Axios metadata for callers while providing an actionable alert.
+        error.message = `${reason} Server: ${address}. Check that the backend is running and reachable from your phone. For a local server, connect both devices to the same Wi-Fi and allow Local Network access in iPhone Settings.`;
+      }
     }
 
     return Promise.reject(error);

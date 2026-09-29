@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Platform, RefreshControl, StyleSheet } from 'react-native';
 import { documentApi } from '../../api/client';
 import { AppHeader } from '../../components/AppHeader';
 import { Container } from '../../components/Container';
@@ -52,7 +52,10 @@ export default function DocumentsScreen() {
         data={documents}
         keyExtractor={(item) => item.id}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
+        automaticallyAdjustKeyboardInsets
         contentContainerStyle={styles.content}
+        keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+        keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <>
             <AppHeader title="Documents" subtitle={`${documents.length} secure files`} rightIcon="refresh-outline" onRightPress={refresh} />
