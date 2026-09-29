@@ -4,27 +4,52 @@ import type { ApiResponse, DashboardSummary, DocumentItem, ListResponse, TokenRe
 
 const API_PORT = '5000';
 const API_PATH = '/api';
+const IOS_LAN_API_HOST = '192.168.1.71';
+const explicitBaseUrl = process.env.EXPO_PUBLIC_API_URL;
+
+function isLocalNetworkHost(host: string) {
+  return (
+    /^10\.\d+\.\d+\.\d+$/.test(host) ||
+    /^192\.168\.\d+\.\d+$/.test(host) ||
+    /^172\.(1[6-9]|2\d|3[01])\.\d+\.\d+$/.test(host)
+  );
+}
 
 function getExpoHost() {
   const scriptURL = NativeModules.SourceCode?.scriptURL as string | undefined;
   const host = scriptURL?.match(/^[a-z]+:\/\/([^/:]+)(?::\d+)?/i)?.[1];
 
-  if (!host || host === 'localhost' || host === '127.0.0.1') {
+  if (!host || host === 'localhost' || host === '127.0.0.1' || !isLocalNetworkHost(host)) {
     return undefined;
   }
 
   return host;
 }
 
-const fallbackHost = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
+const fallbackHost = Platform.OS === 'android' ? '10.0.2.2' : IOS_LAN_API_HOST;
 const defaultBaseUrl = `http://${getExpoHost() || fallbackHost}:${API_PORT}${API_PATH}`;
 
-export const API_BASE_URL = (process.env.EXPO_PUBLIC_API_URL || defaultBaseUrl).replace(/\/+$/, '');
+export const API_BASE_URL = (explicitBaseUrl || defaultBaseUrl).replace(/\/+$/, '');
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 20000
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (axios.isAxiosError(error) && error.message === 'Network Error') {
+      return Promise.reject(
+        new Error(
+          `Cannot reach the API at ${API_BASE_URL}. Make sure the backend is running, your iPhone is on the same Wi-Fi as this computer, and EXPO_PUBLIC_API_URL points to your computer IP.`
+        )
+      );
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 export function setAccessToken(token?: string | null) {
   if (token) {
