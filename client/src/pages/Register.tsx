@@ -1,7 +1,9 @@
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { authApi } from '../api';
+import { authApi, getApiErrorMessage } from '../api';
+
+const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
 
 export function Register() {
   const navigate = useNavigate();
@@ -9,13 +11,18 @@ export function Register() {
   const [loading, setLoading] = useState(false);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
+    if (!strongPassword.test(form.password)) {
+      toast.error('Password must be at least 8 characters and include lowercase, uppercase, number, and symbol.');
+      return;
+    }
+
     setLoading(true);
     try {
       await authApi.register(form);
       toast.success('Registration successful. Verify your email.');
       navigate(`/verify-email?email=${encodeURIComponent(form.email)}`);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Registration failed');
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Registration failed'));
     } finally {
       setLoading(false);
     }
@@ -31,6 +38,7 @@ export function Register() {
           <input className="form-field" placeholder="Full name" value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} required />
           <input className="form-field" type="email" placeholder="Email address" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
           <input className="form-field" type="password" placeholder="Strong password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
+          <p className="text-xs font-semibold leading-5 text-slate-500">Use 8+ characters with lowercase, uppercase, number, and symbol.</p>
           <button className="btn-primary w-full" disabled={loading}>{loading ? 'Creating...' : 'Create Account'}</button>
         </div>
         <p className="mt-5 text-sm font-bold text-slate-600">Already registered? <Link className="text-cyan-700" to="/login">Sign in</Link></p>

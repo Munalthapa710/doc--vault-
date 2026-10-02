@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { authApi } from '../../api/client';
+import { authApi, getApiErrorMessage } from '../../api/client';
 import { Button } from '../../components/Button';
 import { Container } from '../../components/Container';
 import { FormField } from '../../components/FormField';
@@ -9,6 +9,7 @@ import { colors, radius, shadow, spacing } from '../../constants/theme';
 import type { AuthStackParamList } from '../../navigation/RootNavigator';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Register'>;
+const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
 
 export default function RegisterScreen({ navigation }: Props) {
   const [fullName, setFullName] = useState('');
@@ -17,8 +18,13 @@ export default function RegisterScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
-    if (!fullName.trim() || !email.trim() || password.length < 8) {
-      Alert.alert('Check your details', 'Name, email, and a strong password are required.');
+    if (!fullName.trim() || !email.trim()) {
+      Alert.alert('Check your details', 'Name and email are required.');
+      return;
+    }
+
+    if (!strongPassword.test(password)) {
+      Alert.alert('Check your password', 'Use 8+ characters with lowercase, uppercase, number, and symbol.');
       return;
     }
 
@@ -27,7 +33,7 @@ export default function RegisterScreen({ navigation }: Props) {
       await authApi.register({ fullName: fullName.trim(), email: email.trim(), password });
       navigation.navigate('Otp', { email: email.trim(), mode: 'verifyEmail' });
     } catch (error) {
-      Alert.alert('Registration failed', error instanceof Error ? error.message : 'Please try again.');
+      Alert.alert('Registration failed', getApiErrorMessage(error, 'Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -41,6 +47,7 @@ export default function RegisterScreen({ navigation }: Props) {
         <FormField label="Full name" required value={fullName} onChangeText={setFullName} placeholder="Your name" />
         <FormField label="Email" required autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} placeholder="you@example.com" />
         <FormField label="Password" required secureTextEntry value={password} onChangeText={setPassword} placeholder="At least 8 characters" />
+        <Text style={styles.passwordHint}>Use lowercase, uppercase, a number, and a symbol.</Text>
         <Button title="Create account" loading={loading} onPress={submit} />
       </View>
       <Pressable accessibilityRole="button" onPress={() => navigation.goBack()} style={styles.linkButton}>
@@ -85,5 +92,12 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontSize: 15,
     fontWeight: '800'
+  },
+  passwordHint: {
+    marginTop: -spacing.sm,
+    color: colors.muted,
+    fontSize: 12,
+    lineHeight: 18,
+    fontWeight: '700'
   }
 });

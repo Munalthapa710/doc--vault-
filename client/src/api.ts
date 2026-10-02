@@ -28,6 +28,18 @@ export const notifySessionExpired = () => {
 
 export const api = axios.create({ baseURL: resolveApiBaseUrl(), withCredentials: true });
 
+export const getApiErrorMessage = (error: unknown, fallback = 'Request failed') => {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data as { message?: string; errors?: unknown } | undefined;
+    if (data?.message) return data.message;
+    if (Array.isArray(data?.errors) && data.errors.length > 0) return data.errors.join('\n');
+    if (typeof data?.errors === 'string') return data.errors;
+    return error.message || fallback;
+  }
+
+  return error instanceof Error ? error.message : fallback;
+};
+
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem(storageKeys.accessToken);
   if (token) config.headers.Authorization = `Bearer ${token}`;

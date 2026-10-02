@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { authApi } from '../../api/client';
+import { authApi, getApiErrorMessage } from '../../api/client';
 import { Button } from '../../components/Button';
 import { Container } from '../../components/Container';
 import { FormField } from '../../components/FormField';
@@ -18,7 +18,7 @@ export default function OtpScreen({ route, navigation }: Props) {
   const isLogin = route.params.mode === 'login';
 
   const submit = async () => {
-    if (otp.trim().length < 4) {
+    if (otp.trim().length !== 6) {
       Alert.alert('OTP required', 'Enter the verification code sent to your email.');
       return;
     }
@@ -34,7 +34,7 @@ export default function OtpScreen({ route, navigation }: Props) {
         navigation.navigate('Login');
       }
     } catch (error) {
-      Alert.alert('Verification failed', error instanceof Error ? error.message : 'Please try again.');
+      Alert.alert('Verification failed', getApiErrorMessage(error, 'Please try again.'));
     } finally {
       setLoading(false);
     }

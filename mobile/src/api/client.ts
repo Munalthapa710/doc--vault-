@@ -36,6 +36,18 @@ export const api = axios.create({
   timeout: 20000
 });
 
+export function getApiErrorMessage(error: unknown, fallback = 'Request failed') {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data as { message?: string; errors?: unknown } | undefined;
+    if (data?.message) return data.message;
+    if (Array.isArray(data?.errors) && data.errors.length > 0) return data.errors.join('\n');
+    if (typeof data?.errors === 'string') return data.errors;
+    return error.message || fallback;
+  }
+
+  return error instanceof Error ? error.message : fallback;
+}
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -49,6 +61,10 @@ api.interceptors.response.use(
         // Preserve Axios metadata for callers while providing an actionable alert.
         error.message = `${reason} Server: ${address}. Check that the backend is running and reachable from your phone. For a local server, connect both devices to the same Wi-Fi and allow Local Network access in iPhone Settings.`;
       }
+    }
+
+    if (axios.isAxiosError(error) && error.response) {
+      error.message = getApiErrorMessage(error, error.message);
     }
 
     return Promise.reject(error);

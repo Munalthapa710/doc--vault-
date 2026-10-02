@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Eye, EyeOff, LockKeyhole } from 'lucide-react';
 import { useAppStore } from '../store';
+import { getApiErrorMessage } from '../api';
 
 export function Login({ mode = 'password' }: { mode?: 'password' | 'otp' }) {
   const navigate = useNavigate();
@@ -36,8 +37,8 @@ export function Login({ mode = 'password' }: { mode?: 'password' | 'otp' }) {
         toast.success('OTP sent to your email');
         navigate('/login/otp');
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Unable to continue');
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Unable to continue'));
     } finally {
       setLoading(false);
     }

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { authApi } from '../../api/client';
+import { authApi, getApiErrorMessage } from '../../api/client';
 import { Button } from '../../components/Button';
 import { Container } from '../../components/Container';
 import { FormField } from '../../components/FormField';
@@ -42,7 +42,7 @@ export default function LoginScreen({ navigation }: Props) {
         navigation.navigate('Otp', { email: email.trim(), mode: 'login' });
       }
     } catch (error) {
-      Alert.alert('Unable to sign in', error instanceof Error ? error.message : 'Please check your details and try again.');
+      Alert.alert('Unable to sign in', getApiErrorMessage(error, 'Please check your details and try again.'));
     } finally {
       setLoading(false);
     }
