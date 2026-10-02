@@ -5,3 +5,4 @@
 *.log
 .env
 PersonalVault.Api/appsettings.Development.local.json
+PersonalVault.Api/.local/
