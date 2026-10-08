@@ -30,7 +30,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { DataTable } from '../components/DataTable';
 import { TableSkeleton } from '../components/LoadingSkeleton';
 
-const formatBytes = (bytes: number) => bytes < 1048576 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / 1048576).toFixed(1)} MB`;
+const formatBytes = (bytes: number) => bytes < 1024 ? `${bytes} B` : bytes < 1048576 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / 1048576).toFixed(1)} MB`;
 const typeGroups: Record<string, string[]> = {
   pdf: ['pdf'],
   image: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'],
