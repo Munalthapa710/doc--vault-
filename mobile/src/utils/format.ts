@@ -1,6 +1,6 @@
 export function formatBytes(bytes: number) {
   if (!Number.isFinite(bytes) || bytes <= 0) {
-    return '0 KB';
+    return '0 B';
   }
 
   if (bytes < 1024) {
@@ -23,9 +23,14 @@ export function formatDate(value?: string) {
     return 'Not yet';
   }
 
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return 'Not yet';
+  }
+
   return new Intl.DateTimeFormat(undefined, {
     month: 'short',
     day: 'numeric',
     year: 'numeric'
-  }).format(new Date(value));
+  }).format(date);
 }
